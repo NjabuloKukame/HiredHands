@@ -33,35 +33,35 @@ export default function LandingPage() {
       reviews: 127,
       image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2',
       avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-      location: 'Downtown, NYC',
-      startingPrice: '$45'
+      location: 'Johannesburg, SA',
+      startingPrice: 'R45'
     },
     {
       id: 2,
-      name: 'Mike Chen',
+      name: 'Sipho Mokoena',
       service: 'Photography',
       rating: 4.8,
       reviews: 89,
       image: 'https://images.pexels.com/photos/1983032/pexels-photo-1983032.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2',
       avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-      location: 'Brooklyn, NYC',
-      startingPrice: '$150'
+      location: 'Nelspruit, SA',
+      startingPrice: 'R150'
     },
     {
       id: 3,
-      name: 'Lisa Rodriguez',
+      name: 'Lisa van Wyk',
       service: 'Personal Training',
       rating: 4.9,
       reviews: 156,
       image: 'https://images.pexels.com/photos/4162449/pexels-photo-4162449.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2',
       avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-      location: 'Manhattan, NYC',
-      startingPrice: '$60'
+      location: 'Cape Town, SA',
+      startingPrice: 'R300'
     }
   ];
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen pt-16 bg-linear-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Animated background elements */}
@@ -105,7 +105,7 @@ export default function LandingPage() {
                 </div>
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-8 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 smooth-transition flex items-center justify-center gap-2 shadow-lg"
+                  className="bg-linear-to-r from-orange-500 to-pink-500 text-white px-8 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 smooth-transition flex items-center justify-center gap-2 shadow-lg"
                 >
                   Search <ArrowRight className="h-5 w-5" />
                 </button>
@@ -142,7 +142,7 @@ export default function LandingPage() {
                   height={224}
                   className="w-full h-56 object-cover group-hover:scale-110 smooth-transition"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-6 left-6">
                   <h3 className="text-2xl font-bold mb-2 text-white drop-shadow-lg">{category.name}</h3>
                   <p className="text-sm text-white/90 font-medium drop-shadow-md">{category.count}</p>
@@ -266,7 +266,7 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section className="py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/30 to-blue-600/30 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-linear-to-r from-purple-600/30 to-blue-600/30 backdrop-blur-sm"></div>
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
           <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white">
             Ready to Get Started?
@@ -281,7 +281,7 @@ export default function LandingPage() {
             >
               Find a Service
             </button>
-            <button className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-10 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 smooth-transition text-lg shadow-lg">
+            <button className="bg-linear-to-r from-orange-500 to-pink-500 text-white px-10 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 smooth-transition text-lg shadow-lg">
               Become a Provider
             </button>
           </div>
