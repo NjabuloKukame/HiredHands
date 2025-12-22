@@ -140,7 +140,7 @@ export default function AuthModal({ onClose }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 smooth-transition disabled:opacity-50 shadow-lg"
+            className="w-full bg-linear-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 smooth-transition disabled:opacity-50 shadow-lg"
           >
             {loading ? 'Please wait...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
           </button>
