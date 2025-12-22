@@ -99,46 +99,48 @@ export default function SearchResults() {
   ];
 
   return (
-    <div className="min-h-screen pt-16 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen pt-16 bg-linear-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Search Header */}
       <div className="glass-dark border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">
                 {category ? `${category} Services` : 'Search Results'}
               </h1>
-              <p className="text-white/70 mt-2">
+              <p className="text-white/70 mt-2 text-sm sm:text-base">
                 {query && `Results for "${query}"`} {location && `in ${location}`}
                 <span className="ml-2">• Found {providers.length} providers</span>
               </p>
             </div>
-            
-            <div className="flex items-center gap-4">
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-3 rounded-xl smooth-transition ${
+                  className={`p-2 sm:p-3 rounded-xl smooth-transition ${
                     viewMode === 'grid' ? 'bg-blue-500/20 text-blue-400 border border-blue-400/30' : 'text-white/60 hover:text-white/80 border border-white/20'
                   }`}
+                  title="Grid view"
                 >
                   <Grid className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-3 rounded-xl smooth-transition ${
+                  className={`p-2 sm:p-3 rounded-xl smooth-transition ${
                     viewMode === 'list' ? 'bg-blue-500/20 text-blue-400 border border-blue-400/30' : 'text-white/60 hover:text-white/80 border border-white/20'
                   }`}
+                  title="List view"
                 >
                   <List className="h-5 w-5" />
                 </button>
               </div>
-              
-              <div className="relative">
+
+              <div className="relative flex-1 sm:flex-none">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none bg-white/10 border border-white/20 rounded-xl px-4 py-3 pr-10 text-white focus:bg-white/15 focus:border-white/40 focus:outline-none"
+                  className="w-full appearance-none bg-white/10 border border-white/20 rounded-xl px-3 sm:px-4 py-2 sm:py-3 pr-10 text-white text-sm sm:text-base focus:bg-white/15 focus:border-white/40 focus:outline-none"
                 >
                   {sortOptions.map(option => (
                     <option key={option.value} value={option.value} className="bg-slate-800 text-white">
@@ -146,23 +148,23 @@ export default function SearchResults() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-4 h-4 w-4 text-white/60 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
               </div>
-              
+
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 bg-white/10 border border-white/20 text-white px-4 py-3 rounded-xl hover:bg-white/15 smooth-transition"
+                className="flex items-center justify-center gap-2 bg-white/10 border border-white/20 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:bg-white/15 smooth-transition text-sm sm:text-base"
               >
                 <Filter className="h-4 w-4" />
-                Filters
+                <span className="hidden sm:inline">Filters</span>
               </button>
             </div>
           </div>
           
           {/* Filters Panel */}
           {showFilters && (
-            <div className="mt-6 p-6 glass-dark-card rounded-2xl">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="mt-6 p-4 sm:p-6 glass-dark-card rounded-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/80 mb-2">Category</label>
                   <select
@@ -226,17 +228,17 @@ export default function SearchResults() {
       </div>
 
       {/* Results */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className={`grid gap-6 ${
-          viewMode === 'grid' 
-            ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className={`grid gap-4 sm:gap-6 ${
+          viewMode === 'grid'
+            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
             : 'grid-cols-1'
         }`}>
           {providers.map((provider) => (
             <div
               key={provider.id}
               className={`glass-dark-card rounded-2xl overflow-hidden cursor-pointer transform hover:scale-105 smooth-transition hover:shadow-2xl group ${
-                viewMode === 'list' ? 'flex' : ''
+                viewMode === 'list' ? 'flex flex-col sm:flex-row' : ''
               }`}
               onClick={() => router.push(`/provider/${provider.id}`)}
             >
@@ -244,54 +246,55 @@ export default function SearchResults() {
                 src={provider.image}
                 alt={provider.service}
                 className={`object-cover group-hover:scale-110 smooth-transition ${
-                  viewMode === 'list' ? 'w-48 h-48' : 'w-full h-56'
+                  viewMode === 'list' ? 'w-full sm:w-48 h-48' : 'w-full h-48 sm:h-56'
                 }`}
               />
-              <div className="p-6 flex-1">
-                <div className="flex items-center mb-3">
+              <div className="p-4 sm:p-6 flex-1">
+                <div className="flex items-center gap-3 mb-3">
                   <img
                     src={provider.avatar}
                     alt={provider.name}
-                    className="w-14 h-14 rounded-full object-cover mr-4 border-2 border-white/30"
+                    className="w-12 sm:w-14 h-12 sm:h-14 rounded-full object-cover shrink-0 border-2 border-white/30"
                   />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg text-white">{provider.name}</h3>
-                    <p className="text-white/80 text-sm">{provider.service}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-base sm:text-lg text-white truncate">{provider.name}</h3>
+                    <p className="text-white/80 text-xs sm:text-sm truncate">{provider.service}</p>
                   </div>
                 </div>
-                
-                <p className="text-white/80 mb-4 line-clamp-2 leading-relaxed text-sm">{provider.description}</p>
-                
+
+                <p className="text-white/80 mb-4 line-clamp-2 leading-relaxed text-xs sm:text-sm">{provider.description}</p>
+
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {provider.tags.map((tag, index) => (
+                  {provider.tags.slice(0, 2).map((tag, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-white/15 text-white/90 text-xs rounded-full backdrop-blur-sm border border-white/20"
+                      className="px-2 sm:px-3 py-1 bg-white/15 text-white/90 text-xs rounded-full backdrop-blur-sm border border-white/20"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
-                
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                    <span className="font-semibold text-white">{provider.rating}</span>
-                    <span className="text-white/70 ml-1 text-sm">({provider.reviews} reviews)</span>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-emerald-400">
-                      Starting at R{provider.startingPrice}
+
+                <div className="flex flex-col gap-3 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-400 fill-current shrink-0" />
+                      <span className="font-semibold text-white">{provider.rating}</span>
+                      <span className="text-white/70">({provider.reviews})</span>
+                    </div>
+                    <div className="text-sm sm:text-base font-bold text-emerald-400">
+                      R{provider.startingPrice}
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm text-white/70">
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{provider.location} • {provider.distance}</span>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-white/70">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{provider.location}</span>
+                    </div>
+                    <span className="hidden sm:inline text-white/50">•</span>
+                    <span className="text-emerald-400 font-medium">{provider.availability}</span>
                   </div>
-                  <span className="text-emerald-400 font-medium">{provider.availability}</span>
                 </div>
               </div>
             </div>
