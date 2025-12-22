@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Search, User, LogOut, BarChart3 } from 'lucide-react';
@@ -9,6 +10,16 @@ export default function Navbar({ onAuthClick }) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -17,7 +28,11 @@ export default function Navbar({ onAuthClick }) {
   //First
 
   return (
-    <nav className="glass fixed top-0 left-0 right-0 z-50 border-b border-white/20">
+    <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-white/20 transition-all duration-300 ${
+      scrolled 
+        ? 'bg-slate-900/95 backdrop-blur-xl shadow-xl' 
+        : 'glass'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2">
@@ -64,13 +79,13 @@ export default function Navbar({ onAuthClick }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onAuthClick}
-                  className="text-white/80 hover:text-white font-medium smooth-transition"
+                  className="text-white/80 hover:text-white font-medium smooth-transition cursor-pointer"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={onAuthClick}
-                  className="glass-button text-white px-6 py-2 rounded-xl font-medium"
+                  className="glass-button text-white px-6 py-2 rounded-xl font-medium cursor-pointer"
                 >
                   Get Started
                 </button>
