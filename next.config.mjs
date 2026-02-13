@@ -6,11 +6,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.pexels.com',
         port: '',
-        pathname: '/**'
-      }
-    ]
+        pathname: '/**',
+      },
+    ],
   },
-  reactCompiler: true,
 };
 
 export default nextConfig;
