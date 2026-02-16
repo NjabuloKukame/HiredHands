@@ -1,15 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { X, User, Briefcase } from 'lucide-react';
+import { X, User, Briefcase, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function AuthModal({ onClose }) {
-  const router = useRouter();
   const [mode, setMode] = useState('signin');
-  const [role, setRole] = useState('customer');
+  const [role, setRole] = useState('CUSTOMER');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -21,23 +20,31 @@ export default function AuthModal({ onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
+      let result;
+      
       if (mode === 'signin') {
-        await login(formData.email, formData.password, role);
-        onClose();
-        router.push('/dashboard');
+        console.log('Attempting login with:', formData.email);
+        result = await login(formData.email, formData.password);
       } else {
-        await signup(formData.name, formData.email, formData.password, role);
+        console.log('Attempting signup with:', { name: formData.name, email: formData.email, role });
+        result = await signup(formData.name, formData.email, formData.password, role);
+      }
+
+      console.log('Auth result:', result);
+
+      if (result.success) {
+        console.log('Auth successful, closing modal');
         onClose();
-        if (role === 'provider') {
-          router.push('/provider-setup');
-        } else {
-          router.push('/dashboard');
-        }
+      } else {
+        console.error('Auth failed:', result.error);
+        setError(result.error || 'An error occurred. Please try again.');
       }
     } catch (error) {
       console.error('Auth error:', error);
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -58,15 +65,26 @@ export default function AuthModal({ onClose }) {
           </button>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-400/30 rounded-lg flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-red-300 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-300 text-sm font-medium">Error</p>
+              <p className="text-red-200 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
         {mode === 'signup' && (
           <div className="mb-6">
             <p className="text-sm text-white/80 mb-3">I want to:</p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setRole('customer')}
+                onClick={() => setRole('CUSTOMER')}
                 className={`p-4 rounded-xl border-2 text-left smooth-transition ${
-                  role === 'customer'
+                  role === 'CUSTOMER'
                     ? 'border-blue-400/60 bg-blue-500/20'
                     : 'border-white/30 hover:border-white/40 bg-white/5'
                 }`}
@@ -77,9 +95,9 @@ export default function AuthModal({ onClose }) {
               </button>
               <button
                 type="button"
-                onClick={() => setRole('provider')}
+                onClick={() => setRole('PROVIDER')}
                 className={`p-4 rounded-xl border-2 text-left smooth-transition ${
-                  role === 'provider'
+                  role === 'PROVIDER'
                     ? 'border-blue-400/60 bg-blue-500/20'
                     : 'border-white/30 hover:border-white/40 bg-white/5'
                 }`}
@@ -133,22 +151,37 @@ export default function AuthModal({ onClose }) {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/60 focus:bg-white/15 focus:border-white/50 focus:outline-none"
-              placeholder="Enter your password"
+              placeholder={mode === 'signup' ? 'Min 8 chars, 1 uppercase, 1 number' : 'Enter your password'}
             />
+            {mode === 'signup' && (
+              <p className="mt-1 text-xs text-white/60">
+                Password must be at least 8 characters with uppercase, lowercase, and number
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-linear-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 smooth-transition disabled:opacity-50 shadow-lg"
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 smooth-transition disabled:opacity-50 shadow-lg"
           >
-            {loading ? 'Please wait...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Please wait...
+              </span>
+            ) : (
+              mode === 'signin' ? 'Sign In' : 'Create Account'
+            )}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <button
-            onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+            onClick={() => {
+              setMode(mode === 'signin' ? 'signup' : 'signin');
+              setError('');
+            }}
             className="text-white/90 hover:text-white font-medium smooth-transition underline decoration-white/30 hover:decoration-white/60"
           >
             {mode === 'signin' 
