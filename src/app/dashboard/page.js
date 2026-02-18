@@ -1,12 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, DollarSign, Users, Star, Plus, Edit, Trash2, Eye, Clock, TrendingUp } from 'lucide-react';
+import { 
+  Calendar, DollarSign, Users, Star, Plus, Edit, 
+  Trash2, Eye, Clock, TrendingUp, X, CheckCircle2, ChevronRight
+} from 'lucide-react';
 
 export default function ProviderDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // State for Services (CRUD-ready)
+  const [services, setServices] = useState([
+    {
+      id: 1,
+      name: 'Haircut & Style',
+      description: 'Professional cut and styling tailored to your face shape.',
+      duration: '60 min',
+      price: 65,
+      category: 'Cut & Style',
+      active: true,
+      bookings: 23
+    },
+    {
+      id: 2,
+      name: 'Full Color',
+      description: 'Complete color transformation with premium products.',
+      duration: '120 min',
+      price: 120,
+      category: 'Coloring',
+      active: true,
+      bookings: 15
+    }
+  ]);
 
-  // Mock data - in a real app, this would come from an API
+  const [newService, setNewService] = useState({
+    name: '', price: '', duration: '60 min', description: '', category: 'Cut & Style'
+  });
+
   const stats = {
     totalBookings: 47,
     monthlyRevenue: 3240,
@@ -17,469 +48,257 @@ export default function ProviderDashboard() {
   const upcomingBookings = [
     {
       id: 1,
-      customer: {
-        name: 'Emily Chen',
-        avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2'
-      },
+      customer: { name: 'Emily Chen', avatar: 'https://i.pravatar.cc/150?u=emily' },
       service: 'Haircut & Style',
       date: '2024-01-20',
       time: '2:00 PM',
-      duration: '60 min',
       price: 65,
       status: 'confirmed'
     },
     {
       id: 2,
-      customer: {
-        name: 'Jessica Rodriguez',
-        avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2'
-      },
+      customer: { name: 'Jessica Rodriguez', avatar: 'https://i.pravatar.cc/150?u=jess' },
       service: 'Full Color',
       date: '2024-01-21',
       time: '10:00 AM',
-      duration: '120 min',
       price: 120,
       status: 'confirmed'
     }
   ];
 
-  const services = [
-    {
-      id: 1,
-      name: 'Haircut & Style',
-      description: 'Professional cut and styling tailored to your face shape and lifestyle',
-      duration: '60 min',
-      price: 65,
-      category: 'Cut & Style',
+  const handleAddService = (e) => {
+    e.preventDefault();
+    const serviceToAdd = {
+      ...newService,
+      id: Date.now(),
       active: true,
-      bookings: 23
-    },
-    {
-      id: 2,
-      name: 'Full Color',
-      description: 'Complete color transformation with premium products',
-      duration: '120 min',
-      price: 120,
-      category: 'Coloring',
-      active: true,
-      bookings: 15
-    },
-    {
-      id: 3,
-      name: 'Highlights',
-      description: 'Partial or full highlights to brighten your look',
-      duration: '90 min',
-      price: 95,
-      category: 'Coloring',
-      active: true,
-      bookings: 18
-    }
-  ];
-
-  const portfolioItems = [
-    {
-      id: 1,
-      image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=2',
-      title: 'Modern Bob Cut',
-      category: 'Haircut'
-    },
-    {
-      id: 2,
-      image: 'https://images.pexels.com/photos/3764013/pexels-photo-3764013.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=2',
-      title: 'Balayage Highlights',
-      category: 'Color'
-    },
-    {
-      id: 3,
-      image: 'https://images.pexels.com/photos/3065209/pexels-photo-3065209.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&dpr=2',
-      title: 'Wedding Updo',
-      category: 'Special Event'
-    }
-  ];
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
-    });
+      bookings: 0,
+      price: parseFloat(newService.price)
+    };
+    setServices([...services, serviceToAdd]);
+    setIsModalOpen(false);
+    setNewService({ name: '', price: '', duration: '60 min', description: '', category: 'Cut & Style' });
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'confirmed':
-        return 'bg-green-500/20 text-green-300 border border-green-400/30';
-      case 'pending':
-        return 'bg-yellow-500/20 text-yellow-300 border border-yellow-400/30';
-      case 'completed':
-        return 'bg-blue-500/20 text-blue-300 border border-blue-400/30';
-      case 'cancelled':
-        return 'bg-red-500/20 text-red-300 border border-red-400/30';
-      default:
-        return 'bg-white/10 text-white/70 border border-white/20';
-    }
+  const deleteService = (id) => {
+    setServices(services.filter(s => s.id !== id));
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 pt-16">
+    <div className="min-h-screen bg-slate-50 pt-16 text-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Provider Dashboard</h1>
-          <p className="text-white/70">Manage your services, bookings, and business analytics</p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="glass-dark-card rounded-xl p-6 border border-white/20">
-            <div className="flex items-center">
-              <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-400/30">
-                <Calendar className="h-6 w-6 text-blue-400" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-white/70">Total Bookings</p>
-                <p className="text-2xl font-bold text-white">{stats.totalBookings}</p>
-              </div>
-            </div>
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Provider Dashboard</h1>
+            <p className="text-slate-500 mt-1 text-sm font-medium">Overview of your salon's performance and bookings.</p>
           </div>
-
-          <div className="glass-dark-card rounded-xl p-6 border border-white/20">
-            <div className="flex items-center">
-              <div className="p-3 bg-green-500/20 rounded-lg border border-green-400/30">
-                <DollarSign className="h-6 w-6 text-green-400" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-white/70">Monthly Revenue</p>
-                <p className="text-2xl font-bold text-white">${stats.monthlyRevenue}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-dark-card rounded-xl p-6 border border-white/20">
-            <div className="flex items-center">
-              <div className="p-3 bg-yellow-500/20 rounded-lg border border-yellow-400/30">
-                <Star className="h-6 w-6 text-yellow-400" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-white/70">Average Rating</p>
-                <p className="text-2xl font-bold text-white">{stats.averageRating}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-dark-card rounded-xl p-6 border border-white/20">
-            <div className="flex items-center">
-              <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-400/30">
-                <Users className="h-6 w-6 text-purple-400" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-white/70">Total Reviews</p>
-                <p className="text-2xl font-bold text-white">{stats.totalReviews}</p>
-              </div>
-            </div>
+          <div className="flex gap-3">
+             <button className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-all text-sm font-semibold shadow-sm text-slate-700">
+               Export Data
+             </button>
+             <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all text-sm font-semibold flex items-center gap-2 shadow-sm"
+             >
+               <Plus className="h-4 w-4" /> Add Service
+             </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="glass-dark-card rounded-2xl mb-8 border border-white/20">
-          <div className="border-b border-white/20">
-            <nav className="flex space-x-8 px-6">
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === 'overview'
-                    ? 'border-blue-400 text-blue-400'
-                    : 'border-transparent text-white/60 hover:text-white/80'
-                }`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => setActiveTab('bookings')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === 'bookings'
-                    ? 'border-blue-400 text-blue-400'
-                    : 'border-transparent text-white/60 hover:text-white/80'
-                }`}
-              >
-                Bookings
-              </button>
-              <button
-                onClick={() => setActiveTab('services')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === 'services'
-                    ? 'border-blue-400 text-blue-400'
-                    : 'border-transparent text-white/60 hover:text-white/80'
-                }`}
-              >
-                Services
-              </button>
-              <button
-                onClick={() => setActiveTab('portfolio')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === 'portfolio'
-                    ? 'border-blue-400 text-blue-400'
-                    : 'border-transparent text-white/60 hover:text-white/80'
-                }`}
-              >
-                Portfolio
-              </button>
-              <button
-                onClick={() => setActiveTab('analytics')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === 'analytics'
-                    ? 'border-blue-400 text-blue-400'
-                    : 'border-transparent text-white/60 hover:text-white/80'
-                }`}
-              >
-                Analytics
-              </button>
-            </nav>
-          </div>
-
-          <div className="p-6">
-            {/* Overview Tab */}
-            {activeTab === 'overview' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Upcoming Bookings */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-4">Upcoming Bookings</h3>
-                    <div className="space-y-3">
-                      {upcomingBookings.map((booking) => (
-                        <div key={booking.id} className="glass-semi-transparent border border-white/20 rounded-xl p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={booking.customer.avatar}
-                                alt={booking.customer.name}
-                                className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
-                              />
-                              <div>
-                                <p className="font-medium text-white">{booking.customer.name}</p>
-                                <p className="text-sm text-white/70">{booking.service}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold text-emerald-400">${booking.price}</p>
-                              <p className="text-sm text-white/60">
-                                {formatDate(booking.date)} at {booking.time}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Recent Activity */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-green-500/10 rounded-lg border border-green-400/20">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <p className="text-sm text-white/90">New booking from Emily Chen</p>
-                        <span className="text-xs text-white/60 ml-auto">2 hours ago</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-blue-500/10 rounded-lg border border-blue-400/20">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                        <p className="text-sm text-white/90">5-star review received</p>
-                        <span className="text-xs text-white/60 ml-auto">1 day ago</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-yellow-500/10 rounded-lg border border-yellow-400/20">
-                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                        <p className="text-sm text-white/90">Service price updated</p>
-                        <span className="text-xs text-white/60 ml-auto">2 days ago</span>
-                      </div>
-                    </div>
-                  </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {[
+            { label: 'Revenue', value: `R${stats.monthlyRevenue}`, icon: DollarSign, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            { label: 'Bookings', value: stats.totalBookings, icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'Rating', value: stats.averageRating, icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: 'Reviews', value: stats.totalReviews, icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className={`${stat.bg} p-3 rounded-lg`}>
+                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
                 </div>
               </div>
-            )}
+            </div>
+          ))}
+        </div>
 
-            {/* Bookings Tab */}
-            {activeTab === 'bookings' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-white">All Bookings</h3>
-                  <button className="px-4 py-2 bg-linear-to-br from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors">
-                    Set Availability
-                  </button>
+        {/* Navigation Tabs */}
+        <div className="flex border-b border-slate-200 mb-8 overflow-x-auto">
+          {['overview', 'bookings', 'services', 'analytics'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
+                activeTab === tab 
+                ? 'border-indigo-600 text-indigo-600' 
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Content Area */}
+        <div className="min-h-[400px]">
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-slate-900">Upcoming Appointments</h3>
+                    <button className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">View Calendar</button>
                 </div>
-                
                 {upcomingBookings.map((booking) => (
-                  <div key={booking.id} className="glass-semi-transparent border border-white/20 rounded-xl p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4">
-                        <img
-                          src={booking.customer.avatar}
-                          alt={booking.customer.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
-                        />
+                  <div key={booking.id} className="group bg-white border border-slate-200 p-4 rounded-xl hover:border-slate-300 transition-all shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <img src={booking.customer.avatar} className="w-10 h-10 rounded-full bg-slate-100" alt="" />
                         <div>
-                          <h4 className="font-semibold text-white">{booking.customer.name}</h4>
-                          <p className="text-white/70 mb-2">{booking.service}</p>
-                          <div className="flex items-center gap-4 text-sm text-white/60">
-                            <span>{formatDate(booking.date)} at {booking.time}</span>
-                            <span>{booking.duration}</span>
-                          </div>
+                          <h4 className="text-slate-900 font-semibold text-sm">{booking.customer.name}</h4>
+                          <p className="text-xs text-slate-500 font-medium">{booking.service}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-emerald-400 mb-2">${booking.price}</div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                        </span>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <p className="text-slate-900 font-bold text-sm">R{booking.price}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase">{booking.time}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
-
-            {/* Services Tab */}
-            {activeTab === 'services' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-white">My Services</h3>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-linear-to-br from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors">
-                    <Plus className="h-4 w-4" />
-                    Add Service
-                  </button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {services.map((service) => (
-                    <div key={service.id} className="glass-semi-transparent border border-white/20 rounded-xl p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h4 className="font-semibold text-white mb-2">{service.name}</h4>
-                          <span className="text-sm text-blue-300 bg-blue-500/20 px-3 py-1 rounded-full border border-blue-400/30">
-                            {service.category}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button className="p-2 text-white/60 hover:text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors">
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <p className="text-white/70 text-sm mb-4">{service.description}</p>
-                      
-                      <div className="flex justify-between items-center mb-4">
-                        <div>
-                          <div className="text-xl font-bold text-emerald-400">${service.price}</div>
-                          <div className="text-sm text-white/60">{service.duration}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-white">{service.bookings} bookings</div>
-                          <div className={`text-xs ${service.active ? 'text-green-400' : 'text-red-400'}`}>
-                            {service.active ? 'Active' : 'Inactive'}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <button className="w-full border border-white/30 text-white py-2 px-4 rounded-lg hover:bg-white/10 transition-colors">
-                        <Eye className="h-4 w-4 inline mr-2" />
-                        View Details
-                      </button>
-                    </div>
-                  ))}
-                </div>
+              
+              <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200">
+                <h3 className="font-bold text-lg mb-2">Grow your revenue</h3>
+                <p className="text-indigo-100 text-sm leading-relaxed mb-6">
+                  Providers who use our "Last Minute" promotion feature see a 24% increase in booking density.
+                </p>
+                <button className="w-full py-2 bg-white text-indigo-600 font-bold rounded-lg text-sm hover:bg-indigo-50 transition-colors">
+                  Create Promotion
+                </button>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Portfolio Tab */}
-            {activeTab === 'portfolio' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-white">Portfolio</h3>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-linear-to-br from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors">
-                    <Plus className="h-4 w-4" />
-                    Add Image
-                  </button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {portfolioItems.map((item) => (
-                    <div key={item.id} className="relative group">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-48 object-cover rounded-lg border border-white/20"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-opacity rounded-lg flex items-center justify-center">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 bg-white/20 backdrop-blur-sm text-white rounded-lg mr-2 hover:bg-white/30 transition-colors border border-white/30">
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button className="p-2 bg-red-500/20 backdrop-blur-sm text-red-300 rounded-lg hover:bg-red-500/30 transition-colors border border-red-400/30">
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="mt-2">
-                        <h4 className="font-medium text-white">{item.title}</h4>
-                        <p className="text-sm text-white/60">{item.category}</p>
-                      </div>
+          {activeTab === 'services' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.map((service) => (
+                <div key={service.id} className="bg-white border border-slate-200 p-6 rounded-xl hover:shadow-md transition-all">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase tracking-wider">
+                      {service.category}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Analytics Tab */}
-            {activeTab === 'analytics' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-white">Business Analytics</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="glass-semi-transparent rounded-xl p-6 border border-white/20">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-medium text-white">Revenue Trend</h4>
-                      <TrendingUp className="h-5 w-5 text-green-400" />
-                    </div>
-                    <div className="text-2xl font-bold text-white mb-2">$3,240</div>
-                    <p className="text-sm text-green-400">+12% from last month</p>
+                    <button 
+                      onClick={() => deleteService(service.id)}
+                      className="text-slate-300 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
-                  
-                  <div className="glass-semi-transparent rounded-xl p-6 border border-white/20">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-medium text-white">Booking Rate</h4>
-                      <Calendar className="h-5 w-5 text-blue-400" />
+                  <h4 className="text-lg font-bold text-slate-900 mb-1">{service.name}</h4>
+                  <p className="text-sm text-slate-500 line-clamp-2 mb-6 h-10">{service.description}</p>
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <div className="flex flex-col">
+                      <span className="text-xl font-bold text-slate-900">R{service.price}</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">{service.duration}</span>
                     </div>
-                    <div className="text-2xl font-bold text-white mb-2">78%</div>
-                    <p className="text-sm text-blue-400">+5% from last month</p>
+                    <div className="text-right">
+                        <p className="text-xs font-bold text-slate-700">{service.bookings} Bookings</p>
+                        <p className="text-[10px] text-emerald-600 font-bold">● Active</p>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="glass-semi-transparent rounded-xl p-6 border border-white/20">
-                  <h4 className="font-medium text-white mb-4">Popular Services</h4>
-                  <div className="space-y-3">
-                    {services.map((service) => (
-                      <div key={service.id} className="flex items-center justify-between">
-                        <span className="text-white/80">{service.name}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-white/10 rounded-full h-2 border border-white/20">
-                            <div 
-                              className="bg-linear-to-br from-blue-500 to-purple-600 h-2 rounded-full" 
-                              style={{ width: `${(service.bookings / 25) * 100}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm text-white/70">{service.bookings}</span>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'analytics' && (
+             <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
+                 <div className="flex items-center justify-between mb-8">
+                   <h3 className="text-lg font-bold text-slate-900">Revenue (Last 7 Days)</h3>
+                   <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm">
+                     <TrendingUp className="h-4 w-4" /> +12.5%
+                   </div>
+                 </div>
+                 <div className="h-48 flex items-end gap-3">
+                   {[40, 70, 55, 90, 65, 80, 100].map((height, i) => (
+                     <div key={i} className="flex-1 bg-indigo-100 rounded-t-md group relative hover:bg-indigo-600 transition-all cursor-pointer" style={{ height: `${height}%` }}>
+                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-[10px] text-white px-2 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-bold shadow-xl">
+                          ${height * 10}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+                     </div>
+                   ))}
+                 </div>
+                 <div className="flex justify-between mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                   <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                 </div>
+             </div>
+          )}
         </div>
+
+        {/* Light Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px]">
+            <div className="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-slate-900">Create New Service</h2>
+                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <form onSubmit={handleAddService} className="space-y-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Service Name</label>
+                  <input 
+                    required
+                    type="text" 
+                    placeholder="e.g. Deluxe Manicure"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    value={newService.name}
+                    onChange={(e) => setNewService({...newService, name: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Price (R)</label>
+                    <input 
+                      required
+                      type="number" 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      value={newService.price}
+                      onChange={(e) => setNewService({...newService, price: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Duration</label>
+                    <select 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      value={newService.duration}
+                      onChange={(e) => setNewService({...newService, duration: e.target.value})}
+                    >
+                      <option>30 min</option>
+                      <option>60 min</option>
+                      <option>90 min</option>
+                      <option>120 min</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-100 mt-2">
+                  Confirm & Publish
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

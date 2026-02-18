@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import { Calendar, Clock, CreditCard, Check, ArrowLeft, ArrowRight, User, MapPin, Star } from 'lucide-react';
+import { 
+  Calendar, Clock, CreditCard, Check, ArrowLeft, 
+  ArrowRight, User, MapPin, Star, ShieldCheck, ChevronRight 
+} from 'lucide-react';
 
 export default function BookingFlow() {
   const params = useParams();
@@ -14,126 +17,62 @@ export default function BookingFlow() {
     date: '',
     time: '',
     notes: '',
-    customerInfo: {
-      name: '',
-      email: '',
-      phone: ''
-    },
+    customerInfo: { name: '', email: '', phone: '' },
     paymentMethod: 'card'
   });
 
-  // Mock provider data - in a real app, this would be fetched based on the ID
   const provider = {
-    id: 1,
     name: 'Ntombi Dlamini',
-    title: 'Professional Hair Stylist & Colorist',
+    title: 'Professional Hair Stylist',
     rating: 4.9,
     reviews: 127,
-    location: 'Nelspruit, Mpumalanga',
-    avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
+    avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=300',
     services: [
-      {
-        id: '1',
-        name: 'Haircut & Style',
-        description: 'Professional cut and styling tailored to your face shape and lifestyle',
-        duration: '60 min',
-        price: 65
-      },
-      {
-        id: '2',
-        name: 'Full Color',
-        description: 'Complete color transformation with premium products',
-        duration: '120 min',
-        price: 120
-      },
-      {
-        id: '3',
-        name: 'Highlights',
-        description: 'Partial or full highlights to brighten your look',
-        duration: '90 min',
-        price: 95
-      },
-      {
-        id: '4',
-        name: 'Wedding Hair',
-        description: 'Special occasion styling for your perfect day',
-        duration: '90 min',
-        price: 150
-      }
+      { id: '1', name: 'Haircut & Style', duration: '60 min', price: 650 },
+      { id: '2', name: 'Full Color', duration: '120 min', price: 1200 },
+      { id: '3', name: 'Highlights', duration: '90 min', price: 950 },
     ]
   };
 
-  const selectedService = provider.services.find(s => s.id === bookingData.serviceId) || provider.services[0];
+  const selectedService = useMemo(() => 
+    provider.services.find(s => s.id === bookingData.serviceId) || provider.services[0],
+    [bookingData.serviceId]
+  );
 
   const availableDates = [
-    { date: '2024-01-15', day: 'Mon', dayNum: '15' },
-    { date: '2024-01-16', day: 'Tue', dayNum: '16' },
-    { date: '2024-01-17', day: 'Wed', dayNum: '17' },
-    { date: '2024-01-18', day: 'Thu', dayNum: '18' },
-    { date: '2024-01-19', day: 'Fri', dayNum: '19' },
-    { date: '2024-01-22', day: 'Mon', dayNum: '22' },
-    { date: '2024-01-23', day: 'Tue', dayNum: '23' }
+    { date: '2026-02-18', day: 'Wed', dayNum: '18' },
+    { date: '2026-02-19', day: 'Thu', dayNum: '19' },
+    { date: '2026-02-20', day: 'Fri', dayNum: '20' },
+    { date: '2026-02-21', day: 'Sat', dayNum: '21' },
+    { date: '2026-02-23', day: 'Mon', dayNum: '23' },
   ];
 
-  const availableTimes = [
-    '9:00 AM', '10:30 AM', '12:00 PM', '1:30 PM', '3:00 PM', '4:30 PM', '6:00 PM'
-  ];
+  const availableTimes = ['09:00', '10:30', '12:00', '14:00', '15:30', '17:00'];
 
-  const steps = [
-    { number: 1, title: 'Select Service', icon: User },
-    { number: 2, title: 'Choose Date & Time', icon: Calendar },
-    { number: 3, title: 'Your Details', icon: User },
-    { number: 4, title: 'Payment', icon: CreditCard }
-  ];
-
-  const handleNext = () => {
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleBookingComplete = () => {
-    // In a real app, this would process the payment and create the booking
-    router.push('/dashboard');
-  };
+  const handleNext = () => currentStep < 4 && setCurrentStep(currentStep + 1);
+  const handlePrevious = () => currentStep > 1 && setCurrentStep(currentStep - 1);
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Select a Service</h2>
-            <div className="space-y-4">
-              {provider.services.map((service) => (
-                <div
-                  key={service.id}
-                  className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                    bookingData.serviceId === service.id
-                      ? 'border-blue-400 bg-blue-500/20'
-                      : 'border-white/20 hover:border-white/40 bg-white/5'
+          <div className="space-y-4">
+            <h2 className="text-2xl font-black tracking-tighter">Choose a service</h2>
+            <div className="grid gap-3">
+              {provider.services.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setBookingData({ ...bookingData, serviceId: s.id })}
+                  className={`flex justify-between items-center p-5 rounded-2xl border-2 transition-all ${
+                    bookingData.serviceId === s.id ? 'border-black bg-black text-white' : 'border-gray-100 bg-gray-50'
                   }`}
-                  onClick={() => setBookingData({ ...bookingData, serviceId: service.id })}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-white">{service.name}</h3>
-                      <p className="text-white/70 mt-1">{service.description}</p>
-                      <div className="flex items-center mt-2 text-sm text-white/60">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>{service.duration}</span>
-                      </div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="text-2xl font-bold text-emerald-400">R{service.price}</div>
-                    </div>
+                  <div className="text-left">
+                    <p className="font-bold">{s.name}</p>
+                    <p className={`text-xs ${bookingData.serviceId === s.id ? 'text-gray-400' : 'text-gray-500'}`}>{s.duration}</p>
                   </div>
-                </div>
+                  <span className="font-black">R{s.price}</span>
+                </button>
               ))}
             </div>
           </div>
@@ -141,126 +80,70 @@ export default function BookingFlow() {
 
       case 2:
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Choose Date & Time</h2>
-            
+          <div className="space-y-8">
             <div>
-              <h3 className="font-semibold text-white mb-3">Select Date</h3>
-              <div className="grid grid-cols-7 gap-2">
-                {availableDates.map((dateObj) => (
+              <h2 className="text-2xl font-black tracking-tighter mb-4">Select Date</h2>
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {availableDates.map((d) => (
                   <button
-                    key={dateObj.date}
-                    onClick={() => setBookingData({ ...bookingData, date: dateObj.date })}
-                    className={`p-3 rounded-lg text-center transition-colors border ${
-                      bookingData.date === dateObj.date
-                        ? 'bg-blue-500 text-white border-blue-400'
-                        : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                    key={d.date}
+                    onClick={() => setBookingData({ ...bookingData, date: d.date })}
+                    className={`flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all ${
+                      bookingData.date === d.date ? 'border-black bg-black text-white' : 'border-gray-100 bg-white'
                     }`}
                   >
-                    <div className="text-xs">{dateObj.day}</div>
-                    <div className="font-semibold">{dateObj.dayNum}</div>
+                    <span className="text-[10px] uppercase font-black mb-1">{d.day}</span>
+                    <span className="text-lg font-black">{d.dayNum}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {bookingData.date && (
-              <div>
-                <h3 className="font-semibold text-white mb-3">Select Time</h3>
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-                  {availableTimes.map((time) => (
+              <div className="animate-in fade-in slide-in-from-top-4">
+                <h2 className="text-2xl font-black tracking-tighter mb-4">Available Times</h2>
+                <div className="grid grid-cols-3 gap-2">
+                  {availableTimes.map((t) => (
                     <button
-                      key={time}
-                      onClick={() => setBookingData({ ...bookingData, time })}
-                      className={`p-3 rounded-lg text-center transition-colors border ${
-                        bookingData.time === time
-                          ? 'bg-blue-500 text-white border-blue-400'
-                          : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                      key={t}
+                      onClick={() => setBookingData({ ...bookingData, time: t })}
+                      className={`py-4 rounded-xl font-bold border-2 transition-all ${
+                        bookingData.time === t ? 'border-black bg-black text-white' : 'border-gray-100 bg-white hover:border-gray-300'
                       }`}
                     >
-                      {time}
+                      {t}
                     </button>
                   ))}
                 </div>
               </div>
             )}
-
-            <div>
-              <h3 className="font-semibold text-white mb-3">Special Requests (Optional)</h3>
-              <textarea
-                value={bookingData.notes}
-                onChange={(e) => setBookingData({ ...bookingData, notes: e.target.value })}
-                placeholder="Any special requests or notes for your service provider..."
-                className="w-full p-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:bg-white/15 focus:border-white/50 focus:outline-none"
-                rows={3}
-              />
-            </div>
           </div>
         );
 
       case 3:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Your Details</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-white/90 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
+            <h2 className="text-2xl font-black tracking-tighter">Your Information</h2>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-gray-400">Full Name</label>
+                <input 
+                  className="w-full p-4 rounded-xl bg-gray-50 border-2 border-transparent focus:border-black focus:bg-white transition-all outline-none"
+                  placeholder="e.g. Jane Doe"
                   value={bookingData.customerInfo.name}
-                  onChange={(e) => setBookingData({
-                    ...bookingData,
-                    customerInfo: { ...bookingData.customerInfo, name: e.target.value }
-                  })}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:bg-white/15 focus:border-white/50 focus:outline-none"
-                  placeholder="Enter your full name"
+                  onChange={(e) => setBookingData({...bookingData, customerInfo: {...bookingData.customerInfo, name: e.target.value}})}
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/90 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={bookingData.customerInfo.email}
-                  onChange={(e) => setBookingData({
-                    ...bookingData,
-                    customerInfo: { ...bookingData.customerInfo, email: e.target.value }
-                  })}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:bg-white/15 focus:border-white/50 focus:outline-none"
-                  placeholder="Enter your email"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-white/90 mb-2">
-                  Phone Number *
-                </label>
-                <input
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-gray-400">Phone Number</label>
+                <input 
                   type="tel"
-                  required
+                  className="w-full p-4 rounded-xl bg-gray-50 border-2 border-transparent focus:border-black focus:bg-white transition-all outline-none"
+                  placeholder="081 234 5678"
                   value={bookingData.customerInfo.phone}
-                  onChange={(e) => setBookingData({
-                    ...bookingData,
-                    customerInfo: { ...bookingData.customerInfo, phone: e.target.value }
-                  })}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:bg-white/15 focus:border-white/50 focus:outline-none"
-                  placeholder="Enter your phone number"
+                  onChange={(e) => setBookingData({...bookingData, customerInfo: {...bookingData.customerInfo, phone: e.target.value}})}
                 />
               </div>
-            </div>
-
-            <div className="bg-blue-500/20 p-4 rounded-lg border border-blue-400/30">
-              <h4 className="font-semibold text-blue-300 mb-2">Booking Confirmation</h4>
-              <p className="text-blue-200 text-sm">
-                You&apos;ll receive a confirmation email and SMS with booking details and the service provider&apos;s contact information.
-              </p>
             </div>
           </div>
         );
@@ -268,221 +151,96 @@ export default function BookingFlow() {
       case 4:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Payment & Confirmation</h2>
-            
-            <div className="glass-semi-transparent p-6 rounded-lg border border-white/20">
-              <h3 className="font-semibold text-white mb-4">Booking Summary</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-white/70">Service:</span>
-                  <span className="font-medium text-white">{selectedService.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Duration:</span>
-                  <span className="font-medium text-white">{selectedService.duration}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Date:</span>
-                  <span className="font-medium text-white">
-                    {bookingData.date ? new Date(bookingData.date).toLocaleDateString() : 'Not selected'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/70">Time:</span>
-                  <span className="font-medium text-white">{bookingData.time || 'Not selected'}</span>
-                </div>
-                <div className="border-t border-white/20 pt-3 flex justify-between">
-                  <span className="font-semibold text-white">Total:</span>
-                  <span className="font-bold text-xl text-emerald-400">R{selectedService.price}</span>
-                </div>
+            <h2 className="text-2xl font-black tracking-tighter">Confirm & Pay</h2>
+            <div className="p-6 rounded-[2rem] bg-gray-50 border-2 border-gray-100 space-y-4">
+              <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                <span className="font-bold">{selectedService.name}</span>
+                <span className="font-black text-xl">R{selectedService.price}</span>
               </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-white mb-4">Payment Method</h3>
-              <div className="space-y-3">
-                <label className="flex items-center p-4 border border-white/30 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="card"
-                    checked={bookingData.paymentMethod === 'card'}
-                    onChange={(e) => setBookingData({ ...bookingData, paymentMethod: e.target.value })}
-                    className="mr-3"
-                  />
-                  <CreditCard className="h-5 w-5 mr-3 text-white/70" />
-                  <span className="text-white">Credit/Debit Card</span>
-                </label>
-                
-                <label className="flex items-center p-4 border border-white/30 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="paypal"
-                    checked={bookingData.paymentMethod === 'paypal'}
-                    onChange={(e) => setBookingData({ ...bookingData, paymentMethod: e.target.value })}
-                    className="mr-3"
-                  />
-                  <div className="w-5 h-5 mr-3 bg-blue-600 rounded flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">P</span>
-                  </div>
-                  <span className="text-white">PayPal</span>
-                </label>
-              </div>
-            </div>
-
-            {bookingData.paymentMethod === 'card' && (
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <label className="block text-sm font-medium text-white/90 mb-2">
-                    Card Number
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="1234 5678 9012 3456"
-                    className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:bg-white/15 focus:border-white/50 focus:outline-none"
-                  />
+                  <p className="text-gray-400 font-bold uppercase text-[10px]">Date</p>
+                  <p className="font-black">{bookingData.date}</p>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/90 mb-2">
-                      Expiry Date
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="MM/YY"
-                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:bg-white/15 focus:border-white/50 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/90 mb-2">
-                      CVV
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="123"
-                      className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/60 focus:bg-white/15 focus:border-white/50 focus:outline-none"
-                    />
-                  </div>
+                <div>
+                  <p className="text-gray-400 font-bold uppercase text-[10px]">Time</p>
+                  <p className="font-black">{bookingData.time}</p>
                 </div>
               </div>
-            )}
-
-            <div className="bg-yellow-500/20 p-4 rounded-lg border border-yellow-400/30">
-              <h4 className="font-semibold text-yellow-300 mb-2">Cancellation Policy</h4>
-              <p className="text-yellow-200 text-sm">
-                Free cancellation up to 24 hours before your appointment. Cancellations within 24 hours may incur a 50% charge.
-              </p>
             </div>
+            
+            <button className="w-full p-5 bg-emerald-500 text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-600 transition-colors">
+              <ShieldCheck className="w-5 h-5" />
+              Pay R{selectedService.price} Now
+            </button>
           </div>
         );
-
-      default:
-        return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Provider Header */}
-        <div className="glass-dark-card rounded-2xl p-6 mb-8 border border-white/20">
-          <div className="flex items-center gap-4">
-            <img
-              src={provider.avatar}
-              alt={provider.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
-            />
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-white">{provider.name}</h1>
-              <p className="text-white/70">{provider.title}</p>
-              <div className="flex items-center mt-1 text-sm text-white/60">
-                <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                <span className="font-semibold text-white">{provider.rating}</span>
-                <span className="ml-1">({provider.reviews} reviews)</span>
-                <span className="mx-2">•</span>
-                <MapPin className="h-4 w-4 mr-1" />
-                <span>{provider.location}</span>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-white text-[#1a1a1a] pb-10">
+      {/* 1. Slim Header */}
+      <nav className="fixed top-0 inset-x-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+        <div className="max-w-xl mx-auto px-6 h-16 flex items-center justify-between">
+          <button onClick={() => router.back()} className="p-2 -ml-2"><ArrowLeft className="w-5 h-5"/></button>
+          <span className="font-black tracking-tighter">BOOKING</span>
+          <div className="w-9" /> {/* Spacer */}
         </div>
+      </nav>
 
-        {/* Progress Steps */}
-        <div className="glass-dark-card rounded-2xl p-6 mb-8 border border-white/20">
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => (
-              <div key={step.number} className="flex items-center">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                  currentStep >= step.number
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white/20 text-white/50'
-                }`}>
-                  {currentStep > step.number ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    <step.icon className="h-5 w-5" />
-                  )}
-                </div>
-                <div className="ml-3 hidden md:block">
-                  <div className={`text-sm font-medium ${
-                    currentStep >= step.number ? 'text-blue-400' : 'text-white/50'
-                  }`}>
-                    Step {step.number}
-                  </div>
-                  <div className="text-xs text-white/60">{step.title}</div>
-                </div>
-                {index < steps.length - 1 && (
-                  <div className={`hidden md:block w-16 h-0.5 ml-6 ${
-                    currentStep > step.number ? 'bg-blue-500' : 'bg-white/20'
-                  }`} />
-                )}
-              </div>
+      <main className="pt-24 px-6 max-w-xl mx-auto">
+        {/* 2. Step Progress (Mobile Friendly) */}
+        <div className="mb-10">
+          <div className="flex justify-between items-end mb-2">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Step {currentStep} of 4</span>
+            <span className="text-sm font-black">{currentStep === 4 ? 'Ready!' : 'Almost there'}</span>
+          </div>
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden flex gap-1">
+            {[1, 2, 3, 4].map((s) => (
+              <div 
+                key={s} 
+                className={`h-full flex-1 transition-all duration-500 ${currentStep >= s ? 'bg-black' : 'bg-gray-200'}`}
+              />
             ))}
           </div>
         </div>
 
-        {/* Step Content */}
-        <div className="glass-dark-card rounded-2xl p-6 mb-8 border border-white/20">
+        {/* 3. Provider Summary Card (Minimized) */}
+        <div className="flex items-center gap-4 mb-10 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+          <img src={provider.avatar} className="w-12 h-12 rounded-full object-cover" alt="" />
+          <div>
+            <h3 className="font-black text-sm">{provider.name}</h3>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">{provider.title}</p>
+          </div>
+        </div>
+
+        {/* 4. Content Area */}
+        <div className="min-h-[400px]">
           {renderStepContent()}
         </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between">
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className="flex items-center px-6 py-3 border border-white/30 rounded-lg text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
-          </button>
-
-          {currentStep < 4 ? (
-            <button
-              onClick={handleNext}
-              disabled={
-                (currentStep === 1 && !bookingData.serviceId) ||
-                (currentStep === 2 && (!bookingData.date || !bookingData.time)) ||
-                (currentStep === 3 && (!bookingData.customerInfo.name || !bookingData.customerInfo.email || !bookingData.customerInfo.phone))
-              }
-              className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+        {/* 5. Navigation Bottom Bar */}
+        <div className="mt-12 flex gap-3">
+          {currentStep > 1 && (
+            <button 
+              onClick={handlePrevious}
+              className="px-8 py-5 rounded-2xl border-2 border-gray-100 font-black text-sm hover:border-black transition-all"
             >
-              Next
-              <ArrowRight className="h-4 w-4 ml-2" />
+              Back
             </button>
-          ) : (
-            <button
-              onClick={handleBookingComplete}
-              className="flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-colors shadow-lg"
+          )}
+          {currentStep < 4 && (
+            <button 
+              onClick={handleNext}
+              disabled={(currentStep === 1 && !bookingData.serviceId) || (currentStep === 2 && !bookingData.time)}
+              className="flex-1 bg-black text-white py-5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 disabled:bg-gray-200"
             >
-              <Check className="h-4 w-4 mr-2" />
-              Complete Booking
+              Continue <ChevronRight className="w-4 h-4"/>
             </button>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

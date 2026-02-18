@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Search, Star, MapPin, Clock, CheckCircle, ArrowRight } from 'lucide-react';
+import { Search, Star, MapPin, ArrowUpRight, ArrowRight } from 'lucide-react';
 
 export default function LandingPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,136 +16,74 @@ export default function LandingPage() {
   };
 
   const categories = [
-    { name: 'Hair Styling', image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2', count: '1,200+ providers' },
-    { name: 'Photography', image: 'https://images.pexels.com/photos/1983032/pexels-photo-1983032.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2', count: '850+ providers' },
-    { name: 'Home Repair', image: 'https://images.pexels.com/photos/5691569/pexels-photo-5691569.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2', count: '2,100+ providers' },
-    { name: 'Tutoring', image: 'https://images.pexels.com/photos/5212317/pexels-photo-5212317.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2', count: '650+ providers' },
-    { name: 'Personal Training', image: 'https://images.pexels.com/photos/4162449/pexels-photo-4162449.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2', count: '420+ providers' },
-    { name: 'Cleaning', image: 'https://images.pexels.com/photos/4239016/pexels-photo-4239016.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2', count: '980+ providers' }
+    { name: 'Hair Styling', image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=600', span: 'md:col-span-1', count: '1.2k Providers' },
+    { name: 'Photography', image: 'https://images.pexels.com/photos/1983032/pexels-photo-1983032.jpeg?auto=compress&cs=tinysrgb&w=600', span: 'md:col-span-2', count: '850 Providers' },
+    { name: 'Home Repair', image: 'https://images.pexels.com/photos/5691569/pexels-photo-5691569.jpeg?auto=compress&cs=tinysrgb&w=600', span: 'md:col-span-1', count: '2.1k Providers' },
+    { name: 'Personal Training', image: 'https://images.pexels.com/photos/4162449/pexels-photo-4162449.jpeg?auto=compress&cs=tinysrgb&w=600', span: 'md:col-span-2', count: '420 Providers' },
   ];
 
   const featuredProviders = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      service: 'Hair Styling',
-      rating: 4.9,
-      reviews: 127,
-      image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2',
-      avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-      location: 'Johannesburg, SA',
-      startingPrice: 'R45'
-    },
-    {
-      id: 2,
-      name: 'Sipho Mokoena',
-      service: 'Photography',
-      rating: 4.8,
-      reviews: 89,
-      image: 'https://images.pexels.com/photos/1983032/pexels-photo-1983032.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2',
-      avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-      location: 'Nelspruit, SA',
-      startingPrice: 'R150'
-    },
-    {
-      id: 3,
-      name: 'Lisa van Wyk',
-      service: 'Personal Training',
-      rating: 4.9,
-      reviews: 156,
-      image: 'https://images.pexels.com/photos/4162449/pexels-photo-4162449.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=2',
-      avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
-      location: 'Cape Town, SA',
-      startingPrice: 'R300'
-    }
+    { id: 1, name: 'Sarah Johnson', service: 'Hair Styling', rating: 4.9, image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=600', avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150', location: 'Johannesburg, SA', startingPrice: 'R45' },
+    { id: 2, name: 'Sipho Mokoena', service: 'Photography', rating: 4.8, image: 'https://images.pexels.com/photos/1983032/pexels-photo-1983032.jpeg?auto=compress&cs=tinysrgb&w=600', avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150', location: 'Nelspruit, SA', startingPrice: 'R150' },
+    { id: 3, name: 'Lisa van Wyk', service: 'Personal Training', rating: 4.9, image: 'https://images.pexels.com/photos/4162449/pexels-photo-4162449.jpeg?auto=compress&cs=tinysrgb&w=600', avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150', location: 'Cape Town, SA', startingPrice: 'R300' }
   ];
 
   return (
-    <div className="min-h-screen pt-16 bg-linear-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-white text-[#1a1a1a]">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl float-animation"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '4s' }}></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto relative z-10">
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight text-white">
-              Find the Perfect Service Provider for Your Needs
+      <section className="pt-28 md:pt-40 pb-16 px-5 md:px-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-left md:text-center mb-12">
+            <h1 className="text-[2.5rem] md:text-8xl font-black tracking-tighter leading-[1] mb-6">
+              Connect Every <br />
+              <span className="text-gray-300">Service</span> Easily
             </h1>
-            <p className="text-xl md:text-2xl mb-12 text-white/80 font-light">
-              Connect with trusted professionals in your area. From hair styling to home repair, 
-              we&apos;ve got you covered.
+            <p className="text-lg md:text-xl text-gray-500 max-w-2xl md:mx-auto font-medium leading-snug">
+              Trusted by 10k+ users. We bring world-class professionals right to your doorstep.
             </p>
-            
-            <form onSubmit={handleSearch} className="glass-dark-card rounded-2xl p-6 shadow-2xl max-w-4xl mx-auto">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-4 h-5 w-5 text-white/60" />
-                  <input
-                    type="text"
-                    placeholder="What service do you need?"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/70 focus:bg-white/15 focus:border-white/40 focus:outline-none"
-                  />
-                </div>
-                <div className="flex-1 relative">
-                  <MapPin className="absolute left-4 top-4 h-5 w-5 text-white/60" />
-                  <input
-                    type="text"
-                    placeholder="Enter your location"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/70 focus:bg-white/15 focus:border-white/40 focus:outline-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-linear-to-r from-orange-500 to-pink-500 text-white px-8 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 smooth-transition flex items-center justify-center gap-2 shadow-lg"
-                >
-                  Search <ArrowRight className="h-5 w-5" />
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      </section>
 
-      {/* Categories Section */}
-      <section className="py-20 relative">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Popular Service Categories
-            </h2>
-            <p className="text-xl text-white/80 font-light">
-              Browse thousands of professionals ready to help you
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                className="relative overflow-hidden rounded-2xl cursor-pointer transform hover:scale-105 smooth-transition glass-card group"
-                onClick={() => router.push(`/search?category=${encodeURIComponent(category.name)}`)}
-              >
-                <Image
-                  src={category.image}
-                  alt={category.name}
-                  width={300}
-                  height={224}
-                  className="w-full h-56 object-cover group-hover:scale-110 smooth-transition"
+          {/* Mobile-First Search Form */}
+          <form onSubmit={handleSearch} className="relative z-10 max-w-4xl mx-auto mb-16">
+            <div className="flex flex-col md:flex-row bg-white border border-gray-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] rounded-[2.5rem] p-2 md:p-3">
+              <div className="flex items-center px-4 py-3 md:flex-1 border-b md:border-b-0 md:border-r border-gray-50">
+                <Search className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
+                <input 
+                  type="text" 
+                  placeholder="Service..." 
+                  className="w-full bg-transparent focus:outline-none font-bold text-gray-800 placeholder:text-gray-300"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-6 left-6">
-                  <h3 className="text-2xl font-bold mb-2 text-white drop-shadow-lg">{category.name}</h3>
-                  <p className="text-sm text-white/90 font-medium drop-shadow-md">{category.count}</p>
+              </div>
+              <div className="flex items-center px-4 py-3 md:flex-1">
+                <MapPin className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
+                <input 
+                  type="text" 
+                  placeholder="Location..." 
+                  className="w-full bg-transparent focus:outline-none font-bold text-gray-800 placeholder:text-gray-300"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+              </div>
+              <button type="submit" className="bg-[#1a1a1a] text-white p-4 md:px-10 rounded-[2rem] font-black hover:bg-black transition-all flex items-center justify-center gap-2">
+                Search <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+          </form>
+
+          {/* Bento Grid - Stacks on mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {categories.map((cat, i) => (
+              <div key={i} className={`relative overflow-hidden rounded-[2.5rem] h-[300px] md:h-[400px] group cursor-pointer ${cat.span}`}>
+                <Image src={cat.image} alt={cat.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute bottom-8 left-8">
+                  <span className="text-[10px] uppercase font-black tracking-[0.2em] text-white/60 mb-1 block">{cat.count}</span>
+                  <h3 className="text-2xl font-black text-white">{cat.name}</h3>
+                </div>
+                <div className="absolute top-6 right-6 w-12 h-12 bg-white rounded-full hidden md:flex items-center justify-center scale-50 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all">
+                  <ArrowUpRight className="text-black" />
                 </div>
               </div>
             ))}
@@ -153,62 +91,36 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Featured Providers */}
-      <section className="py-20 relative">
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Top Rated Service Providers
-            </h2>
-            <p className="text-xl text-white/80 font-light">
-              Meet some of our highest-rated professionals
-            </p>
+      {/* Featured Providers Section */}
+      <section className="bg-gray-50/50 py-20 px-5 md:px-10 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tighter">Featured Pros</h2>
+              <p className="text-gray-500 font-medium">Top-rated experts in your area.</p>
+            </div>
+            <button className="text-sm font-black border-b-2 border-black pb-1 w-fit">View All Providers</button>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
-            {featuredProviders.map((provider) => (
-              <div
-                key={provider.id}
-                className="glass-dark-card rounded-2xl overflow-hidden cursor-pointer transform hover:scale-105 smooth-transition group"
-                onClick={() => router.push(`/provider/${provider.id}`)}
-              >
-                <Image
-                  src={provider.image}
-                  alt={provider.service}
-                  width={300}
-                  height={224}
-                  className="w-full h-56 object-cover group-hover:scale-110 smooth-transition"
-                />
-                <div className="p-6">
-                  <div className="flex items-center mb-3">
-                    <Image
-                      src={provider.avatar}
-                      alt={provider.name}
-                      width={56}
-                      height={56}
-                      className="w-14 h-14 rounded-full object-cover mr-4 border-2 border-white/30"
-                    />
-                    <div>
-                      <h3 className="font-bold text-lg text-white">{provider.name}</h3>
-                      <p className="text-white/80 text-sm">{provider.service}</p>
-                    </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredProviders.map((p) => (
+              <div key={p.id} className="bg-white rounded-[2.5rem] p-4 border border-gray-100 group">
+                <div className="relative h-64 md:h-72 rounded-[2rem] overflow-hidden mb-6">
+                  <Image src={p.image} alt="" fill className="object-cover" />
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-black" />
+                    <span className="text-xs font-black">{p.rating}</span>
                   </div>
-                  
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                      <span className="font-semibold text-white">{provider.rating}</span>
-                      <span className="text-white/70 ml-1 text-sm">({provider.reviews} reviews)</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-emerald-400">Starting at {provider.startingPrice}</div>
-                    </div>
+                </div>
+                <div className="flex items-center gap-4 px-2 pb-2">
+                  <img src={p.avatar} className="w-12 h-12 rounded-full border-2 border-gray-50" alt="" />
+                  <div className="flex-1">
+                    <h4 className="font-black text-lg leading-tight">{p.name}</h4>
+                    <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{p.service}</p>
                   </div>
-                  
-                  <div className="flex items-center text-white/70 text-sm">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{provider.location}</span>
+                  <div className="text-right">
+                    <span className="text-[10px] text-gray-400 block font-bold uppercase">From</span>
+                    <span className="font-black text-lg">{p.startingPrice}</span>
                   </div>
                 </div>
               </div>
@@ -216,75 +128,23 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* How It Works */}
-      <section className="py-20 relative">
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              How ServiceHub Works
-            </h2>
-            <p className="text-xl text-white/80 font-light">
-              Getting the help you need is simple and straightforward
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
-            <div className="text-center">
-              <div className="glass-dark-card w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group hover:scale-110 smooth-transition">
-                <Search className="h-10 w-10 text-white group-hover:scale-110 smooth-transition" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-white">1. Search & Browse</h3>
-              <p className="text-white/70 font-light leading-relaxed">
-                Find service providers in your area by searching for specific services or browsing categories.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="glass-dark-card w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group hover:scale-110 smooth-transition">
-                <Clock className="h-10 w-10 text-white group-hover:scale-110 smooth-transition" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-white">2. Book & Schedule</h3>
-              <p className="text-white/70 font-light leading-relaxed">
-                Review profiles, check availability, and book appointments that fit your schedule.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="glass-dark-card w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group hover:scale-110 smooth-transition">
-                <CheckCircle className="h-10 w-10 text-white group-hover:scale-110 smooth-transition" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-white">3. Get Service</h3>
-              <p className="text-white/70 font-light leading-relaxed">
-                Meet with your chosen professional and get the quality service you deserve.
-              </p>
+      <section className="py-24 px-6 text-center">
+        <div className="max-w-4xl mx-auto bg-[#1a1a1a] rounded-[3rem] py-20 px-8 text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Get Started?</h2>
+            <p className="text-gray-400 mb-10 max-w-md mx-auto">Join thousands of satisfied customers who found their perfect service provider today.</p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button className="bg-white text-black px-10 py-4 rounded-full font-bold hover:scale-105 transition-transform">
+                Find a Service
+              </button>
+              <button className="bg-white/10 backdrop-blur-md border border-white/20 px-10 py-4 rounded-full font-bold hover:bg-white/20 transition-all">
+                Become a Provider
+              </button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 relative">
-        <div className="absolute inset-0 bg-linear-to-r from-purple-600/30 to-blue-600/30 backdrop-blur-sm"></div>
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-            Ready to Get Started?
-          </h2>
-          <p className="text-xl mb-12 text-white/80 font-light">
-            Join thousands of satisfied customers who found their perfect service provider
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button
-              onClick={() => router.push('/search')}
-              className="glass-button text-white px-10 py-4 rounded-xl font-semibold text-lg"
-            >
-              Find a Service
-            </button>
-            <button className="bg-linear-to-r from-orange-500 to-pink-500 text-white px-10 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 smooth-transition text-lg shadow-lg">
-              Become a Provider
-            </button>
-          </div>
+          {/* Subtle background flair */}
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
         </div>
       </section>
     </div>
