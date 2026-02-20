@@ -145,7 +145,7 @@ export default function CustomerSetup() {
         return;
       }
 
-      router.push('/dashboard');
+      router.push('/customer-dashboard');
     } catch (err) {
       setSubmitError('Network error. Please check your connection and try again.');
     } finally {
