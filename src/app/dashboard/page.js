@@ -147,7 +147,7 @@ export default function ProviderDashboard() {
         </div>
 
         {/* Content Area */}
-        <div className="min-h-[400px]">
+        <div className="min-h-100">
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-4">

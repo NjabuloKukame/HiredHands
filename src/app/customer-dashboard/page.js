@@ -173,7 +173,7 @@ export default function CustomerDashboard() {
             </div>
 
             {/* ── Tab Content ── */}
-            <div className="min-h-[400px]">
+            <div className="min-h-100">
 
               {/* PROFILE TAB */}
               {activeTab === 'profile' && (
@@ -319,7 +319,7 @@ export default function CustomerDashboard() {
                                 <div className={`p-2 ${bg} rounded-lg`}><Icon className={`h-4 w-4 ${color}`} /></div>
                                 <div>
                                   <p className="text-[10px] font-bold text-slate-400 uppercase">{label}</p>
-                                  <p className="text-xs font-bold text-slate-700 truncate max-w-[100px]">{value}</p>
+                                  <p className="text-xs font-bold text-slate-700 truncate max-w-25">{value}</p>
                                 </div>
                               </div>
                             ))}

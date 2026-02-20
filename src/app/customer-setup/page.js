@@ -213,7 +213,7 @@ export default function CustomerSetup() {
                 {/* Avatar */}
                 <div className="flex flex-col items-center">
                   <div className="relative">
-                    <div className="w-32 h-32 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
+                    <div className="w-32 h-32 rounded-4xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
                       {profileImage
                         ? <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
                         : <User className="h-10 w-10 text-slate-200" />}

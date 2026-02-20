@@ -88,7 +88,7 @@ export default function BookingFlow() {
                   <button
                     key={d.date}
                     onClick={() => setBookingData({ ...bookingData, date: d.date })}
-                    className={`flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all ${
+                    className={`shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center border-2 transition-all ${
                       bookingData.date === d.date ? 'border-black bg-black text-white' : 'border-gray-100 bg-white'
                     }`}
                   >
@@ -152,7 +152,7 @@ export default function BookingFlow() {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-black tracking-tighter">Confirm & Pay</h2>
-            <div className="p-6 rounded-[2rem] bg-gray-50 border-2 border-gray-100 space-y-4">
+            <div className="p-6 rounded-4xl bg-gray-50 border-2 border-gray-100 space-y-4">
               <div className="flex justify-between items-center pb-4 border-b border-gray-200">
                 <span className="font-bold">{selectedService.name}</span>
                 <span className="font-black text-xl">R{selectedService.price}</span>
@@ -216,7 +216,7 @@ export default function BookingFlow() {
         </div>
 
         {/* 4. Content Area */}
-        <div className="min-h-[400px]">
+        <div className="min-h-100">
           {renderStepContent()}
         </div>
 
