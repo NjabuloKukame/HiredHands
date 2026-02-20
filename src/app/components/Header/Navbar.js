@@ -20,7 +20,9 @@ export default function Navbar({ onAuthClick }) {
   }, []);
 
   // Close menu when route changes
-  useEffect(() => setIsMenuOpen(false), [pathname]);
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
