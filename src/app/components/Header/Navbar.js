@@ -66,7 +66,7 @@ export default function Navbar({ onAuthClick }) {
               </>
             ) : (
               <div className="hidden md:flex items-center space-x-4">
-                <Link href="/dashboard" className="flex items-center space-x-3">
+                <Link href="/customer-dashboard" className="flex items-center space-x-3">
                   <img src={user.avatar} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="" />
                 </Link>
                 <button onClick={logout} className="p-2.5 bg-gray-50 rounded-full hover:bg-red-50 transition-colors group">
