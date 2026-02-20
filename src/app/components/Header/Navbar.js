@@ -12,6 +12,7 @@ export default function Navbar({ onAuthClick }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -20,9 +21,10 @@ export default function Navbar({ onAuthClick }) {
   }, []);
 
   // Close menu when route changes
-  useEffect(() => {
+  if (pathname !== prevPathname) {
     setIsMenuOpen(false);
-  }, [pathname]);
+    setPrevPathname(pathname);
+  }
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
