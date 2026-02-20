@@ -14,7 +14,6 @@ export default function ProviderSetup() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
-  const [categories, setCategories] = useState([]);
 
   const [businessInfo, setBusinessInfo] = useState({
     businessName: '',
@@ -43,20 +42,23 @@ export default function ProviderSetup() {
     { value: 6, label: 'Saturday' }
   ];
 
-  useEffect(() => {
     // Simulating fetching categories
-    setCategories([
-      { id: '1', name: 'Hair Styling' }, { id: '2', name: 'Photography' },
-      { id: '3', name: 'Home Repair' }, { id: '4', name: 'Tutoring' },
-      { id: '5', name: 'Cleaning' }, { id: '6', name: 'Beauty & Makeup' }
-    ]);
-  }, []);
+    const categories = [
+      { id: '1', name: 'Hair Styling' },
+      { id: '2', name: 'Photography' },
+      { id: '3', name: 'Home Repair' },
+      { id: '4', name: 'Tutoring' },
+      { id: '5', name: 'Cleaning' },
+      { id: '6', name: 'Beauty & Makeup' }
+    ];
+
+
 
   // Handlers for Services and Availability (kept your logic)
   const addService = () => setServices([...services, { id: Date.now().toString(), name: '', description: '', categoryId: '', price: '', durationMinutes: '60' }]);
   const removeService = (id) => services.length > 1 && setServices(services.filter(s => s.id !== id));
   const updateService = (id, field, value) => setServices(services.map(s => s.id === id ? { ...s, [field]: value } : s));
-  
+
   const addAvailabilitySlot = () => setAvailability([...availability, { dayOfWeek: 1, startTime: '09:00', endTime: '17:00' }]);
   const removeAvailabilitySlot = (index) => availability.length > 1 && setAvailability(availability.filter((_, i) => i !== index));
   const updateAvailability = (index, field, value) => setAvailability(availability.map((slot, i) => i === index ? { ...slot, [field]: value } : slot));
@@ -100,9 +102,8 @@ export default function ProviderSetup() {
           {steps.map((step, idx) => (
             <div key={step.number} className="flex items-center">
               <div className="flex flex-col items-center">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border-2 ${
-                  currentStep >= step.number ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-400'
-                }`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border-2 ${currentStep >= step.number ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-400'
+                  }`}>
                   {currentStep > step.number ? <Check className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
                 </div>
                 <span className={`mt-2 text-[10px] font-bold uppercase tracking-widest ${currentStep >= step.number ? 'text-indigo-600' : 'text-slate-400'}`}>
@@ -117,7 +118,7 @@ export default function ProviderSetup() {
         {/* Main Card */}
         <div className="bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 overflow-hidden">
           <div className="p-8 sm:p-12">
-            
+
             {/* Step 1: Business Info */}
             {currentStep === 1 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
@@ -135,20 +136,20 @@ export default function ProviderSetup() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
-                    <FormInput label="Business Name" icon={Briefcase} value={businessInfo.businessName} onChange={(v) => setBusinessInfo({...businessInfo, businessName: v})} placeholder="Elite Auto Detailing" />
+                    <FormInput label="Business Name" icon={Briefcase} value={businessInfo.businessName} onChange={(v) => setBusinessInfo({ ...businessInfo, businessName: v })} placeholder="Elite Auto Detailing" />
                   </div>
                   <div className="md:col-span-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Business Bio</label>
-                    <textarea 
+                    <textarea
                       value={businessInfo.bio}
-                      onChange={(e) => setBusinessInfo({...businessInfo, bio: e.target.value})}
+                      onChange={(e) => setBusinessInfo({ ...businessInfo, bio: e.target.value })}
                       rows={3}
                       className="w-full mt-2 bg-slate-50 border border-slate-200 rounded-2xl p-4 focus:bg-white focus:border-indigo-500 outline-none transition-all text-sm"
                       placeholder="Describe your expertise and service quality..."
                     />
                   </div>
-                  <FormInput label="Location" icon={MapPin} value={businessInfo.location} onChange={(v) => setBusinessInfo({...businessInfo, location: v})} placeholder="Johannesburg, GP" />
-                  <FormInput label="Phone" icon={Phone} value={businessInfo.phone} onChange={(v) => setBusinessInfo({...businessInfo, phone: v})} placeholder="+27 82 123 4567" />
+                  <FormInput label="Location" icon={MapPin} value={businessInfo.location} onChange={(v) => setBusinessInfo({ ...businessInfo, location: v })} placeholder="Johannesburg, GP" />
+                  <FormInput label="Phone" icon={Phone} value={businessInfo.phone} onChange={(v) => setBusinessInfo({ ...businessInfo, phone: v })} placeholder="+27 82 123 4567" />
                 </div>
               </div>
             )}
@@ -172,7 +173,7 @@ export default function ProviderSetup() {
                         </div>
                         <div className="md:col-span-1">
                           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Category</label>
-                          <select 
+                          <select
                             value={service.categoryId}
                             onChange={(e) => updateService(service.id, 'categoryId', e.target.value)}
                             className="w-full mt-2 bg-white border border-slate-200 rounded-2xl py-3.5 px-4 outline-none focus:border-indigo-500 text-sm"
@@ -204,13 +205,13 @@ export default function ProviderSetup() {
                     + Add Slot
                   </button>
                 </div>
-                
+
                 <div className="space-y-3">
                   {availability.map((slot, index) => (
                     <div key={index} className="flex flex-wrap items-end gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
                       <div className="flex-1 min-w-[140px]">
                         <label className="text-[10px] font-bold text-slate-400 uppercase">Day</label>
-                        <select 
+                        <select
                           value={slot.dayOfWeek}
                           onChange={(e) => updateAvailability(index, 'dayOfWeek', parseInt(e.target.value))}
                           className="w-full mt-1 bg-white border border-slate-200 rounded-xl p-2.5 text-sm outline-none"
@@ -252,7 +253,7 @@ export default function ProviderSetup() {
               disabled={(currentStep === 1 && !isStep1Valid()) || (currentStep === 2 && !isStep2Valid())}
               className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 hover:-translate-y-1 transition-all flex items-center gap-2 disabled:opacity-50"
             >
-              {currentStep === 3 ? 'Launch Business' : 'Continue'} 
+              {currentStep === 3 ? 'Launch Business' : 'Continue'}
               {currentStep === 3 ? <Check className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             </button>
           </div>
