@@ -36,7 +36,7 @@ export default function BookingFlow() {
 
   const selectedService = useMemo(() => 
     provider.services.find(s => s.id === bookingData.serviceId) || provider.services[0],
-    [bookingData.serviceId]
+    [bookingData.serviceId, provider.services]
   );
 
   const availableDates = [
