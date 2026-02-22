@@ -27,12 +27,11 @@ export default function Navbar({ onAuthClick }) {
   }
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-      scrolled ? 'py-3 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm' : 'py-5 bg-transparent'
-    }`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-3 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm' : 'py-5 bg-transparent'
+      }`}>
       <div className="max-w-7xl mx-auto px-5 md:px-10">
         <div className="flex justify-between items-center h-12">
-          
+
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group relative z-50">
             <div className="bg-[#1a1a1a] p-1.5 rounded-xl transition-transform group-hover:rotate-12">
@@ -44,19 +43,19 @@ export default function Navbar({ onAuthClick }) {
               <span className="hidden md:inline">HiredHands</span>
             </span>
           </Link>
-          
+
           {/* Desktop Nav - Pill Style */}
           <div className="hidden md:flex items-center bg-gray-50/50 border border-gray-100 rounded-full px-1 py-1">
-            <Link href="/search" className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-              pathname === '/search' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
-            }`}>
+            <Link href="/" className="px-6 py-2 text-sm font-bold text-gray-500 hover:text-black">
+              Home
+            </Link>
+            <Link href="/search" className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${pathname === '/search' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+              }`}>
               Browse
             </Link>
-            <Link href="#" className="px-6 py-2 text-sm font-bold text-gray-500 hover:text-black">
-              Resources
-            </Link>
+
           </div>
-          
+
           {/* Desktop & Mobile Actions */}
           <div className="flex items-center space-x-2 relative z-50">
             {!user ? (
@@ -80,7 +79,7 @@ export default function Navbar({ onAuthClick }) {
             )}
 
             {/* Mobile Menu Toggle */}
-            <button 
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2.5 bg-gray-50 rounded-full md:hidden text-[#1a1a1a]"
             >
@@ -91,9 +90,8 @@ export default function Navbar({ onAuthClick }) {
       </div>
 
       {/* Mobile Menu Overlay */}
-      <div className={`fixed inset-0 bg-white z-40 transition-transform duration-500 md:hidden ${
-        isMenuOpen ? 'translate-y-0' : '-translate-y-full invisible'
-      }`}>
+      <div className={`fixed inset-0 bg-white z-40 transition-transform duration-500 md:hidden ${isMenuOpen ? 'translate-y-0' : '-translate-y-full invisible'
+        }`}>
         <div className="pt-32 px-8 flex flex-col space-y-8">
           <Link href="/search" className="text-4xl font-black tracking-tighter flex justify-between items-center">
             Browse <ChevronRight className="w-8 h-8 text-gray-200" />
@@ -104,7 +102,7 @@ export default function Navbar({ onAuthClick }) {
           <Link href="#" className="text-4xl font-black tracking-tighter flex justify-between items-center">
             Stories <ChevronRight className="w-8 h-8 text-gray-200" />
           </Link>
-          
+
           <div className="pt-10 space-y-4">
             {user ? (
               <button onClick={logout} className="w-full py-4 rounded-2xl bg-red-50 text-red-500 font-bold text-lg">
