@@ -77,6 +77,7 @@ model ProviderProfile {
   location          String
   coverImage        String?
   responseTimeHours Int       @default(24)
+  bookingFee        Float    @default(0)
   languages         String[]  @default(["English"])
   
   // Status
