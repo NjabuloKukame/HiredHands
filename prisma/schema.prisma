@@ -52,10 +52,17 @@ model CustomerProfile {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   location        String?
+  address         String?  // ← add this
   preferredLanguages String[]
   
   // Favorites
-  favoriteProviders String[] // Array of provider IDs
+  favoriteProviders String[]
+
+  // Notification preferences  ← add all four of these
+  emailNotifications Boolean @default(true)
+  smsNotifications   Boolean @default(false)
+  reminders          Boolean @default(true)
+  newProviders       Boolean @default(false)
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

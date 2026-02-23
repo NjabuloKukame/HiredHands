@@ -93,14 +93,14 @@ export default function Navbar({ onAuthClick }) {
       <div className={`fixed inset-0 bg-white z-40 transition-transform duration-500 md:hidden ${isMenuOpen ? 'translate-y-0' : '-translate-y-full invisible'
         }`}>
         <div className="pt-32 px-8 flex flex-col space-y-8">
+          <Link href="/" className="text-4xl font-black tracking-tighter flex justify-between items-center">
+            Home <ChevronRight className="w-8 h-8 text-gray-200" />
+          </Link>
           <Link href="/search" className="text-4xl font-black tracking-tighter flex justify-between items-center">
             Browse <ChevronRight className="w-8 h-8 text-gray-200" />
           </Link>
-          <Link href="#" className="text-4xl font-black tracking-tighter flex justify-between items-center">
-            How it Works <ChevronRight className="w-8 h-8 text-gray-200" />
-          </Link>
-          <Link href="#" className="text-4xl font-black tracking-tighter flex justify-between items-center">
-            Stories <ChevronRight className="w-8 h-8 text-gray-200" />
+          <Link href={user.role === 'PROVIDER' ? '/dashboard' : '/customer-dashboard'} className="text-4xl font-black tracking-tighter flex justify-between items-center">
+            Dashboard <ChevronRight className="w-8 h-8 text-gray-200" />
           </Link>
 
           <div className="pt-10 space-y-4">
