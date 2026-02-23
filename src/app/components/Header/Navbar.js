@@ -99,9 +99,11 @@ export default function Navbar({ onAuthClick }) {
           <Link href="/search" className="text-4xl font-black tracking-tighter flex justify-between items-center">
             Browse <ChevronRight className="w-8 h-8 text-gray-200" />
           </Link>
-          <Link href={user.role === 'PROVIDER' ? '/dashboard' : '/customer-dashboard'} className="text-4xl font-black tracking-tighter flex justify-between items-center">
-            Dashboard <ChevronRight className="w-8 h-8 text-gray-200" />
-          </Link>
+          {user && (
+            <Link href={user.role === 'PROVIDER' ? '/dashboard' : '/customer-dashboard'} className="text-4xl font-black tracking-tighter flex justify-between items-center">
+              Dashboard <ChevronRight className="w-8 h-8 text-gray-200" />
+            </Link>
+          )}
 
           <div className="pt-10 space-y-4">
             {user ? (
