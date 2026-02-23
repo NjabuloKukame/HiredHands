@@ -1,10 +1,16 @@
 // ========================================
 // FILE: app/api/provider/portfolio/[itemId]/route.js
 // ========================================
+//
+// DELETE: removes portfolio item from DB AND deletes the image from Cloudinary.
+// Requires the PortfolioItem model to have a `publicId` field (String?).
+// See schema note at bottom of this file.
+// ========================================
 
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@/generated/prisma';
+import { deleteFromCloudinary } from '@/app/lib/cloudinary';
 
 const prisma = new PrismaClient();
 
@@ -24,20 +30,30 @@ export async function DELETE(request, { params }) {
 
     const { itemId } = params;
 
+    // Get providerProfile id
     const providerProfile = await prisma.providerProfile.findUnique({
       where: { userId: decoded.userId },
       select: { id: true },
     });
     if (!providerProfile) return NextResponse.json({ error: 'Provider not found.' }, { status: 404 });
 
-    // Verify ownership before deleting
+    // Fetch the item to verify ownership and get publicId
     const item = await prisma.portfolioItem.findUnique({
       where: { id: itemId },
-      select: { id: true, providerId: true },
+      select: { id: true, providerId: true, publicId: true },
     });
-    if (!item) return NextResponse.json({ error: 'Item not found.' }, { status: 404 });
-    if (item.providerId !== providerProfile.id) return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
 
+    if (!item) return NextResponse.json({ error: 'Item not found.' }, { status: 404 });
+    if (item.providerId !== providerProfile.id) {
+      return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
+    }
+
+    // Delete from Cloudinary first (non-blocking — DB delete still happens even if this fails)
+    if (item.publicId) {
+      await deleteFromCloudinary(item.publicId);
+    }
+
+    // Delete from DB
     await prisma.portfolioItem.delete({ where: { id: itemId } });
 
     return NextResponse.json({ message: 'Portfolio item deleted.' }, { status: 200 });

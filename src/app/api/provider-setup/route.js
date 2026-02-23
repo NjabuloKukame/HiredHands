@@ -28,7 +28,7 @@ export async function POST(request) {
     const body = await request.json();
     const { businessInfo, services, availability, portfolio = [] } = body;
 
-    // ── Validation ───────────────────────────────────────────────────────────
+    // ── Validation ────────────────────────────────────────────────────────────
     if (!businessInfo?.businessName?.trim())
       return NextResponse.json({ message: 'Business name is required.' }, { status: 400 });
     if (!businessInfo?.bio?.trim() || businessInfo.bio.trim().length < 20)
@@ -52,7 +52,10 @@ export async function POST(request) {
     if (portfolio.length > 4)
       return NextResponse.json({ message: 'Maximum 4 portfolio images allowed.' }, { status: 400 });
 
-    // ── Verify categories ─────────────────────────────────────────────────────
+    // ── Pre-fetch everything needed BEFORE the transaction ────────────────────
+    // Doing reads inside the transaction burns time on the clock — move them out.
+
+    // 1. Verify categories exist
     const categoryIds = [...new Set(services.map(s => s.categoryId))];
     const validCategories = await prisma.category.findMany({
       where: { id: { in: categoryIds } },
@@ -61,19 +64,63 @@ export async function POST(request) {
     if (validCategories.length !== categoryIds.length)
       return NextResponse.json({ message: 'One or more selected categories are invalid.' }, { status: 400 });
 
-    // ── Transaction ───────────────────────────────────────────────────────────
-    await prisma.$transaction(async (tx) => {
-      // Update User (phone + avatar)
-      await tx.user.update({
+    // 2. Get the providerProfile id — we need this for all related writes
+    const providerProfile = await prisma.providerProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    if (!providerProfile)
+      return NextResponse.json({ message: 'Provider profile not found.' }, { status: 404 });
+
+    const providerId = providerProfile.id;
+
+    // ── Clear old related data BEFORE the transaction ─────────────────────────
+    // Deletes are the slowest part. Running them outside shrinks the transaction
+    // window dramatically — these don't need to be atomic with the writes below
+    // because a failed re-setup just means the provider runs setup again.
+    await prisma.service.deleteMany({ where: { providerId } });
+    await prisma.availability.deleteMany({ where: { providerId } });
+    await prisma.portfolioItem.deleteMany({ where: { providerId } });
+
+    // ── Pre-build all create data arrays (CPU work, not DB work) ──────────────
+    const servicesData = services.map(s => ({
+      providerId,
+      categoryId:      s.categoryId,
+      name:            s.name.trim(),
+      description:     s.description?.trim() || '',
+      price:           parseFloat(s.price),
+      durationMinutes: parseInt(s.durationMinutes) || 60,
+      active:          true,
+    }));
+
+    const availabilityData = availability.map(slot => ({
+      providerId,
+      dayOfWeek: slot.dayOfWeek,
+      startTime: slot.startTime,
+      endTime:   slot.endTime,
+    }));
+
+    const portfolioData = portfolio.map(item => ({
+      providerId,
+      imageUrl:    item.imageUrl,
+      publicId:    item.publicId ?? null,
+      title:       item.title || 'Portfolio Image',
+      description: null,
+      category:    null,
+    }));
+
+    // ── Transaction: ONLY writes, no reads, no deletes ────────────────────────
+    // Using the array form ($transaction([...])) which is faster than the
+    // interactive callback form — Prisma sends all queries in a single batch.
+    await prisma.$transaction([
+      prisma.user.update({
         where: { id: userId },
         data: {
           phone: businessInfo.phone.trim(),
           ...(businessInfo.profileImageUrl && { avatar: businessInfo.profileImageUrl }),
         },
-      });
-
-      // Update ProviderProfile
-      await tx.providerProfile.update({
+      }),
+      prisma.providerProfile.update({
         where: { userId },
         data: {
           businessName:      businessInfo.businessName.trim(),
@@ -87,56 +134,11 @@ export async function POST(request) {
           setupCompleted:    true,
           active:            true,
         },
-      });
-
-      // Get providerProfile id
-      const providerProfile = await tx.providerProfile.findUnique({
-        where: { userId },
-        select: { id: true },
-      });
-      const providerId = providerProfile.id;
-
-      // Clear old data (idempotent re-submission)
-      await tx.service.deleteMany({ where: { providerId } });
-      await tx.availability.deleteMany({ where: { providerId } });
-      await tx.portfolioItem.deleteMany({ where: { providerId } });
-
-      // Create services
-      await tx.service.createMany({
-        data: services.map(s => ({
-          providerId,
-          categoryId:      s.categoryId,
-          name:            s.name.trim(),
-          description:     s.description?.trim() || '',
-          price:           parseFloat(s.price),
-          durationMinutes: parseInt(s.durationMinutes) || 60,
-          active:          true,
-        })),
-      });
-
-      // Create availability
-      await tx.availability.createMany({
-        data: availability.map(slot => ({
-          providerId,
-          dayOfWeek: slot.dayOfWeek,
-          startTime: slot.startTime,
-          endTime:   slot.endTime,
-        })),
-      });
-
-      // Create portfolio items (only if URLs were uploaded successfully)
-      if (portfolio.length > 0) {
-        await tx.portfolioItem.createMany({
-          data: portfolio.map(item => ({
-            providerId,
-            imageUrl:    item.imageUrl,
-            title:       item.title || 'Portfolio Image',
-            description: null,
-            category:    null,
-          })),
-        });
-      }
-    });
+      }),
+      prisma.service.createMany({ data: servicesData }),
+      prisma.availability.createMany({ data: availabilityData }),
+      ...(portfolioData.length > 0 ? [prisma.portfolioItem.createMany({ data: portfolioData })] : []),
+    ]);
 
     return NextResponse.json({ message: 'Provider profile saved successfully.' }, { status: 200 });
 

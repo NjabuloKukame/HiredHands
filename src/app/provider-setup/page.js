@@ -78,7 +78,7 @@ export default function ProviderSetup() {
     fetchCategories();
   }, []);
 
-  // ── Profile image ────────────────────────────────────────────────────────
+  // ── Profile image (local preview only — uploaded on submit) ──────────────
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -88,7 +88,7 @@ export default function ProviderSetup() {
     reader.readAsDataURL(file);
   };
 
-  // ── Portfolio images ─────────────────────────────────────────────────────
+  // ── Portfolio images (local preview only — uploaded on submit) ───────────
   const handlePortfolioAdd = (e) => {
     const files = Array.from(e.target.files);
     const remaining = MAX_PORTFOLIO_IMAGES - portfolioImages.length;
@@ -135,7 +135,10 @@ export default function ProviderSetup() {
   const removeAvailabilitySlot = (index) =>
     availability.length > 1 && setAvailability(prev => prev.filter((_, i) => i !== index));
   const updateAvailability = (index, field, value) =>
-    setAvailability(prev => prev.map((slot, i) => i === index ? { ...slot, [field]: field === 'dayOfWeek' ? parseInt(value) : value } : slot));
+    setAvailability(prev => prev.map((slot, i) => i === index
+      ? { ...slot, [field]: field === 'dayOfWeek' ? parseInt(value) : value }
+      : slot
+    ));
 
   // ── Validation ────────────────────────────────────────────────────────────
   const validateStep1 = () => {
@@ -175,35 +178,66 @@ export default function ProviderSetup() {
     setCurrentStep(s => s + 1);
   };
 
+  // ── Upload helper ─────────────────────────────────────────────────────────
+  // Returns { url, publicId } on success, or null on failure.
+  async function uploadFile(file, type) {
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const res = await fetch(`/api/upload?type=${type}`, {
+        method: 'POST',
+        body: fd,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error(`[upload] ${type} failed:`, err.error || res.status);
+        return null;
+      }
+      return await res.json(); // { url, publicId }
+    } catch (err) {
+      console.error(`[upload] ${type} network error:`, err);
+      return null;
+    }
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     setLoading(true);
     setSubmitError('');
 
     try {
-      // Upload profile image
+      // 1. Upload avatar (?type=avatar)
+      //    Goes to: hired-hands/providers/{userId}/avatar/avatar
+      //    Uses a stable public ID so re-uploads overwrite automatically.
       let profileImageUrl = null;
       if (profileImageFile) {
-        const fd = new FormData();
-        fd.append('file', profileImageFile);
-        const r = await fetch('/api/upload', { method: 'POST', body: fd });
-        if (r.ok) profileImageUrl = (await r.json()).url;
+        const result = await uploadFile(profileImageFile, 'avatar');
+        if (result) {
+          profileImageUrl = result.url;
+          // publicId not stored for avatar — it always overwrites the same path
+        } else {
+          console.warn('[setup] Avatar upload failed, continuing without avatar.');
+        }
       }
 
-      // Upload portfolio images
+      // 2. Upload portfolio images (?type=portfolio)
+      //    Each gets a unique Cloudinary ID so multiple images accumulate.
+      //    We store BOTH url AND publicId so the dashboard can delete from Cloudinary later.
       const portfolioData = [];
       for (const item of portfolioImages) {
-        const fd = new FormData();
-        fd.append('file', item.file);
-        try {
-          const r = await fetch('/api/upload', { method: 'POST', body: fd });
-          if (r.ok) {
-            const { url } = await r.json();
-            portfolioData.push({ imageUrl: url, title: item.title.trim() || 'Portfolio Image' });
-          }
-        } catch { /* skip failed uploads */ }
+        const result = await uploadFile(item.file, 'portfolio');
+        if (result) {
+          portfolioData.push({
+            imageUrl: result.url,
+            publicId: result.publicId,  // ← required for Cloudinary deletion later
+            title:    item.title.trim() || 'Portfolio Image',
+          });
+        } else {
+          console.warn('[setup] A portfolio image failed to upload, skipping it.');
+        }
       }
 
+      // 3. POST everything to /api/provider-setup
       const payload = {
         businessInfo: {
           ...businessInfo,
@@ -228,9 +262,13 @@ export default function ProviderSetup() {
       });
 
       const data = await res.json();
-      if (!res.ok) { setSubmitError(data.message || 'Something went wrong.'); return; }
+      if (!res.ok) {
+        setSubmitError(data.message || 'Something went wrong. Please try again.');
+        return;
+      }
 
       router.push('/dashboard');
+
     } catch {
       setSubmitError('Network error. Please check your connection and try again.');
     } finally {
@@ -288,13 +326,15 @@ export default function ProviderSetup() {
         <div className="bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 overflow-hidden">
           <div className="p-8 sm:p-12">
 
-            {/* ── STEP 1: Business Info ── */}
+            {/* ── STEP 1 ── */}
             {currentStep === 1 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                 <div className="flex flex-col items-center">
                   <div className="relative">
                     <div className="w-28 h-28 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
-                      {profileImage ? <img src={profileImage} className="w-full h-full object-cover" alt="Business" /> : <Briefcase className="w-8 h-8 text-slate-300" />}
+                      {profileImage
+                        ? <img src={profileImage} className="w-full h-full object-cover" alt="Business" />
+                        : <Briefcase className="w-8 h-8 text-slate-300" />}
                     </div>
                     <button onClick={() => fileInputRef.current?.click()} className="absolute -bottom-2 -right-2 p-3 bg-black text-white rounded-2xl shadow-lg hover:scale-110 transition-all">
                       <Camera className="w-4 h-4" />
@@ -313,13 +353,11 @@ export default function ProviderSetup() {
 
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Business Bio</label>
-                    <textarea
-                      value={businessInfo.bio}
+                    <textarea value={businessInfo.bio}
                       onChange={e => { setBusinessInfo(p => ({ ...p, bio: e.target.value })); setStep1Errors(err => ({ ...err, bio: '' })); }}
                       rows={3}
                       className={`w-full bg-slate-50 border rounded-2xl p-4 focus:bg-white focus:border-black outline-none transition-all text-sm ${step1Errors.bio ? 'border-red-300' : 'border-slate-200'}`}
-                      placeholder="Describe your expertise and what makes your service exceptional..."
-                    />
+                      placeholder="Describe your expertise and what makes your service exceptional..." />
                     {step1Errors.bio && <ErrorMessage message={step1Errors.bio} />}
                   </div>
 
@@ -329,14 +367,13 @@ export default function ProviderSetup() {
 
                   <FormInput label="Phone" icon={Phone} value={businessInfo.phone}
                     onChange={v => { setBusinessInfo(p => ({ ...p, phone: v })); setStep1Errors(e => ({ ...e, phone: '' })); }}
-                    placeholder="+27 82 123 4567" error={step1Errors.phone} />
+                    placeholder="0821234567" error={step1Errors.phone} />
 
                   <FormInput label="Years of Experience (optional)" icon={Briefcase} type="number"
                     value={businessInfo.experienceYears}
                     onChange={v => setBusinessInfo(p => ({ ...p, experienceYears: v }))}
                     placeholder="5" />
 
-                  {/* ── Booking Fee ── */}
                   <div className="space-y-1">
                     <FormInput label="Base Booking Fee, ZAR (optional)" icon={DollarSign}
                       type="number" min="0" step="0.01"
@@ -359,7 +396,6 @@ export default function ProviderSetup() {
                   </div>
                 </div>
 
-                {/* Languages */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Globe className="w-4 h-4 text-black" />
@@ -370,7 +406,9 @@ export default function ProviderSetup() {
                       const selected = businessInfo.languages.includes(lang);
                       return (
                         <button key={lang} type="button" onClick={() => toggleLanguage(lang)}
-                          className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-200 ${selected ? 'bg-black border-black text-white shadow-md shadow-gray-100' : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-gray-300'}`}>
+                          className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all duration-200 ${
+                            selected ? 'bg-black border-black text-white shadow-md shadow-gray-100' : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-gray-300'
+                          }`}>
                           {selected && <Check className="inline w-3 h-3 mr-1 -mt-0.5" />}{lang}
                         </button>
                       );
@@ -381,7 +419,7 @@ export default function ProviderSetup() {
               </div>
             )}
 
-            {/* ── STEP 2: Services ── */}
+            {/* ── STEP 2 ── */}
             {currentStep === 2 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                 <div className="flex justify-between items-center">
@@ -391,9 +429,9 @@ export default function ProviderSetup() {
                   </button>
                 </div>
 
-                {step2Errors.services && <ErrorMessage message={step2Errors.services} />}
-                {step2Errors.price   && <ErrorMessage message={step2Errors.price} />}
-                {step2Errors.duration && <ErrorMessage message={step2Errors.duration} />}
+                {step2Errors.services  && <ErrorMessage message={step2Errors.services} />}
+                {step2Errors.price     && <ErrorMessage message={step2Errors.price} />}
+                {step2Errors.duration  && <ErrorMessage message={step2Errors.duration} />}
 
                 <div className="space-y-4">
                   {services.map(service => (
@@ -433,7 +471,7 @@ export default function ProviderSetup() {
               </div>
             )}
 
-            {/* ── STEP 3: Availability ── */}
+            {/* ── STEP 3 ── */}
             {currentStep === 3 && (
               <div className="space-y-6 animate-in fade-in zoom-in-95">
                 <div className="flex justify-between items-center">
@@ -479,7 +517,7 @@ export default function ProviderSetup() {
               </div>
             )}
 
-            {/* ── STEP 4: Portfolio ── */}
+            {/* ── STEP 4 ── */}
             {currentStep === 4 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                 <div>
@@ -497,20 +535,14 @@ export default function ProviderSetup() {
                         className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm text-slate-600 hover:text-red-500 rounded-lg shadow-sm transition-colors">
                         <X className="w-4 h-4" />
                       </button>
-                      {/* Caption overlay */}
                       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
-                        <input
-                          type="text"
-                          value={img.title}
-                          onChange={e => updatePortfolioTitle(index, e.target.value)}
+                        <input type="text" value={img.title} onChange={e => updatePortfolioTitle(index, e.target.value)}
                           placeholder="Add a caption..."
-                          className="w-full bg-transparent text-white text-xs font-medium placeholder:text-white/60 outline-none border-b border-white/30 focus:border-white pb-0.5"
-                        />
+                          className="w-full bg-transparent text-white text-xs font-medium placeholder:text-white/60 outline-none border-b border-white/30 focus:border-white pb-0.5" />
                       </div>
                     </div>
                   ))}
 
-                  {/* Upload slot */}
                   {portfolioImages.length < MAX_PORTFOLIO_IMAGES && (
                     <button onClick={() => portfolioInputRef.current?.click()}
                       className="aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:border-gray-300 hover:bg-gray-50/30 transition-all flex flex-col items-center justify-center gap-3 text-slate-400 hover:text-black">
@@ -528,6 +560,14 @@ export default function ProviderSetup() {
                   <p className="text-center text-xs text-slate-400 font-medium pt-2">
                     Portfolio is optional — you can skip this and add photos later from your dashboard.
                   </p>
+                )}
+
+                {/* Progress indicator shown while uploading */}
+                {loading && (
+                  <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-600 text-sm font-medium">
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    Uploading photos and saving your profile...
+                  </div>
                 )}
 
                 {submitError && (

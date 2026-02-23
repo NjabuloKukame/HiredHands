@@ -16,14 +16,15 @@ function getUserFromToken(request) {
   } catch { return null; }
 }
 
-// POST: add a portfolio image
 export async function POST(request) {
   try {
     const decoded = getUserFromToken(request);
     if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     if (decoded.role !== 'PROVIDER') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-    const { imageUrl, title } = await request.json();
+    // Now expects both url and publicId from the upload endpoint
+    const { imageUrl, publicId, title } = await request.json();
+
     if (!imageUrl) return NextResponse.json({ message: 'Image URL is required.' }, { status: 400 });
 
     const providerProfile = await prisma.providerProfile.findUnique({
@@ -40,9 +41,10 @@ export async function POST(request) {
       data: {
         providerId: providerProfile.id,
         imageUrl,
-        title: title?.trim() || 'Portfolio Image',
+        publicId:   publicId ?? null,   // ← stored for Cloudinary deletion
+        title:      title?.trim() || 'Portfolio Image',
       },
-      select: { id: true, imageUrl: true, title: true, description: true, category: true },
+      select: { id: true, imageUrl: true, publicId: true, title: true, description: true, category: true },
     });
 
     return NextResponse.json({ item }, { status: 201 });

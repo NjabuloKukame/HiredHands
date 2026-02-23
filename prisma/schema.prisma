@@ -293,6 +293,7 @@ model PortfolioItem {
   provider    ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
   
   imageUrl    String
+  publicId  String? 
   title       String
   description String?
   category    String?
