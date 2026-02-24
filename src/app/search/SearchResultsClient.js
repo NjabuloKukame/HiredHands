@@ -21,7 +21,7 @@ function PriceBadge({ bookingFee, startingPrice }) {
     return (
       <div className="text-right">
         <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Booking fee</p>
-        <p className="text-xl font-black">{formatCurrency(bookingFee)}</p>
+        <p className="text-xl font-black">{formatCurrency(Math.round(bookingFee))}</p>
       </div>
     );
   }
@@ -29,7 +29,7 @@ function PriceBadge({ bookingFee, startingPrice }) {
     return (
       <div className="text-right">
         <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">From</p>
-        <p className="text-xl font-black">{formatCurrency(startingPrice)}</p>
+        <p className="text-xl font-black">{formatCurrency(Math.round(startingPrice))}</p>
       </div>
     );
   }
@@ -62,7 +62,7 @@ function ProviderCard({ provider, viewMode, onClick }) {
                   : <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0"><User className="w-4 h-4 text-gray-300" /></div>}
                 <div className="min-w-0">
                   <h3 className="font-black text-lg tracking-tight truncate group-hover:underline decoration-2">{provider.businessName}</h3>
-                  {/* <p className="text-gray-500 text-sm font-medium truncate">{provider.primaryService || provider.primaryCategory || 'Professional Services'}</p> */}
+                  <p className="text-gray-500 text-sm font-medium truncate">{provider.primaryCategory || provider.primaryService ||  'Professional Services'}</p>
                 </div>
               </div>
               <PriceBadge bookingFee={provider.bookingFee} startingPrice={provider.startingPrice} />
@@ -275,10 +275,10 @@ export default function SearchResultsClient() {
                 )}
               </button>
 
-              <div className="h-8 w-px bg-gray-100 hidden md:block" />
+              <div className="h-8 w-px bg-gray-100" />
 
               {/* View mode toggle */}
-              <div className="hidden md:flex bg-gray-50 p-1 rounded-2xl">
+              <div className="flex bg-gray-50 p-1 rounded-2xl">
                 <button onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-gray-400'}`}>
                   <Grid className="w-4 h-4" />
