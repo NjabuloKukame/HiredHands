@@ -98,12 +98,12 @@ function ProviderCard({ provider, viewMode, onClick }) {
   return (
     <div onClick={onClick} className="group cursor-pointer">
       {/* Cover image */}
-      <div className="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden bg-gray-100 mb-6">
+      <div className="relative aspect-4/3 rounded-[2.5rem] overflow-hidden bg-gray-100 mb-6">
         {provider.coverImage ? (
           <img src={provider.coverImage}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100">
             <Briefcase className="h-16 w-16 text-gray-200" />
           </div>
         )}
@@ -358,7 +358,7 @@ export default function SearchResultsClient() {
         {/* Results */}
         {!loading && !error && providers.length > 0 && (
           <>
-            <div className={`grid gap-8 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 max-w-3xl'}`}>
+            <div className={`grid gap-8 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 max-w-3xl mx-auto'}`}>
               {providers.map(p => (
                 <ProviderCard key={p.id} provider={p} viewMode={viewMode}
                   onClick={() => router.push(`/provider/${p.id}`)} />
@@ -385,7 +385,7 @@ export default function SearchResultsClient() {
 
       {/* ── Filter Drawer ── */}
       {showFilters && (
-        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center">
+        <div className="fixed inset-0 z-100 flex items-end md:items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowFilters(false)} />
           <div className="relative bg-white w-full max-w-lg md:rounded-[2.5rem] rounded-t-[2.5rem] p-8 md:p-10 shadow-2xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-10">
 
