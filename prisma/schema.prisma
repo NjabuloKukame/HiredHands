@@ -96,6 +96,8 @@ model ProviderProfile {
   totalBookings     Int       @default(0)
   totalRevenue      Float     @default(0)
   averageRating     Float?
+
+  payStackMerchantId  String? 
   
   // Relations
   services          Service[]
@@ -180,6 +182,7 @@ model Availability {
 enum BookingStatus {
   PENDING
   CONFIRMED
+  IN_PROGRESS   
   COMPLETED
   CANCELLED
   NO_SHOW
@@ -222,6 +225,32 @@ model Booking {
   customerName    String
   customerEmail   String
   customerPhone   String
+
+  // Financial breakdown (add these)
+  subtotal        Float   @default(0)  // amount owed to provider
+  platformFee     Float   @default(0)  // Hired Hands 8% cut
+  gatewayFee      Float   @default(0)  // processing cost (for audit)
+  totalCharged    Float   @default(0)  // what customer actually pays
+
+  // PayFast payment tracking (add these)
+  pfPaymentId     String?       //  payment ID (m_payment_id)
+  pfPaymentToken  String?              // idempotency — prevents double-charging
+  paymentType     String?              // "full" | "booking_fee"
+
+  // Payout tracking — filled when PIN is verified (add these)
+  payoutAmount    Float?
+  payoutReference String?
+  payoutFiredAt   DateTime?
+  payoutStatus    String?   // "pending" | "completed" | "failed"
+  payoutRetries   Int       @default(0)
+
+  // PIN fraud detection (add these — used in next phase)
+  verificationPin String?   // bcrypt hash — never store plaintext
+  pinExpiresAt    DateTime?
+  pinAttempts     Int       @default(0)
+  pinLockedUntil  DateTime?
+  verifiedAt      DateTime?
+  pinGeneratedAt  DateTime?
   
   // Relations
   review          Review?
@@ -246,7 +275,7 @@ model Payment {
   booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   
   amount          Float
-  currency        String        @default("USD")
+  currency        String        @default("ZAR")
   paymentMethod   String        // "card", "paypal", etc.
   
   // Payment Gateway Info

@@ -245,7 +245,7 @@ export default function CustomerDashboard() {
             </h1>
             <p className="text-slate-500 mt-1 text-sm font-medium">Manage your appointments and personal settings.</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-sm font-bold shadow-sm hover:bg-gray-900 transition-all">
+          <button className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-sm font-bold shadow-sm hover:bg-gray-900 transition-all" onClick={() => router.push('/search')}>
             Explore Services
           </button>
         </div>
@@ -524,7 +524,7 @@ export default function CustomerDashboard() {
                               <div className={`p-2 ${bg} rounded-lg`}><Icon className={`h-4 w-4 ${color}`} /></div>
                               <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase">{label}</p>
-                                <p className="text-xs font-bold text-slate-700 truncate max-w-[100px]">{value}</p>
+                                <p className="text-xs font-bold text-slate-700 truncate max-w-25">{value}</p>
                               </div>
                             </div>
                           ))}

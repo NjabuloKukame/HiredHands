@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Calendar, Clock, Check, ArrowLeft, User,
   ShieldCheck, ChevronRight, Loader2, AlertCircle,
-  CreditCard, Wallet, Phone, FileText, Briefcase
+  CreditCard, Wallet, Phone, FileText
 } from 'lucide-react';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -142,7 +142,6 @@ export default function BookingFlow() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting]   = useState(false);
-  const [confirmed, setConfirmed]     = useState(null); // { id, date, time, price }
 
   const [bookingData, setBookingData] = useState({
     serviceId: '',
@@ -224,14 +223,14 @@ export default function BookingFlow() {
     setSubmitError('');
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  // ── Submit → create booking + redirect to PayFast ────────────────────────
   const handleSubmit = async (paymentType) => {
     if (!validateStep(3)) return;
     setSubmitting(true);
     setSubmitError('');
 
     try {
-      const res = await fetch('/api/bookings', {
+      const res = await fetch('/api/checkout', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -240,7 +239,7 @@ export default function BookingFlow() {
           date:          bookingData.date,
           time:          bookingData.time,
           notes:         sanitise(bookingData.notes),
-          paymentType,   // "full" | "booking_fee"
+          paymentType,
           customerName:  sanitise(bookingData.customerInfo.name),
           customerPhone: sanitise(bookingData.customerInfo.phone),
         }),
@@ -249,8 +248,8 @@ export default function BookingFlow() {
       const data = await res.json();
       if (!res.ok) { setSubmitError(data.message || 'Something went wrong.'); return; }
 
-      setConfirmed(data.booking);
-      setCurrentStep(5); // confirmation screen
+      // Redirect to PayFast hosted checkout
+      window.location.href = data.url;
     } catch {
       setSubmitError('Network error. Please check your connection and try again.');
     } finally {
@@ -274,45 +273,6 @@ export default function BookingFlow() {
       </div>
     </div>
   );
-
-  // ── Confirmation screen ────────────────────────────────────────────────────
-  if (currentStep === 5 && confirmed) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6">
-        <div className="max-w-sm w-full text-center space-y-6">
-          <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
-            <Check className="w-10 h-10 text-emerald-500" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tighter mb-2">Booking Confirmed!</h1>
-            <p className="text-gray-500 font-medium">Your booking request has been sent to the provider.</p>
-          </div>
-          <div className="p-6 bg-gray-50 rounded-3xl text-left space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-bold">Service</span>
-              <span className="font-black">{selectedService?.name}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-bold">Date</span>
-              <span className="font-black">{confirmed.date}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500 font-bold">Time</span>
-              <span className="font-black">{confirmed.time}</span>
-            </div>
-            <div className="flex justify-between text-sm pt-3 border-t border-gray-200">
-              <span className="text-gray-500 font-bold">Amount charged</span>
-              <span className="font-black text-lg">{fmt(confirmed.price)}</span>
-            </div>
-          </div>
-          <button onClick={() => router.push('/customer-dashboard')}
-            className="w-full bg-black text-white py-4 rounded-2xl font-black hover:bg-gray-900 transition-all">
-            View My Bookings
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // ── Step content ───────────────────────────────────────────────────────────
   const renderStep = () => {
@@ -477,7 +437,20 @@ export default function BookingFlow() {
         );
 
       // ── Step 4: Review + pay ───────────────────────────────────────────────
-      case 4:
+      case 4: {
+        // Mirror server-side fee logic exactly — user sees what they'll actually pay
+        const PLATFORM_FEE_RATE = 0.08;
+        const PLATFORM_FEE_MIN  = 10;
+
+        const fullBase        = servicePrice + bookingFee;
+        const feeOnlyBase     = bookingFee;
+
+        const fullPlatformFee    = Math.max(Math.round(fullBase    * PLATFORM_FEE_RATE * 100) / 100, PLATFORM_FEE_MIN);
+        const feeOnlyPlatformFee = Math.max(Math.round(feeOnlyBase * PLATFORM_FEE_RATE * 100) / 100, PLATFORM_FEE_MIN);
+
+        const fullTotal    = Math.round((fullBase    + fullPlatformFee)    * 100) / 100;
+        const feeOnlyTotal = Math.round((feeOnlyBase + feeOnlyPlatformFee) * 100) / 100;
+
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-black tracking-tighter">Confirm & Pay</h2>
@@ -526,6 +499,17 @@ export default function BookingFlow() {
               )}
             </div>
 
+            {/* Platform fee explanation — shown once above both buttons */}
+            <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+              <ShieldCheck className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-blue-700 font-medium leading-relaxed">
+                A <span className="font-black">8% platform fee</span> (min R10) is added to cover
+                secure payments, fraud protection, and holding your money safely until
+                the service is confirmed on the day. The provider receives their full amount only
+                after you verify their arrival PIN.
+              </p>
+            </div>
+
             {/* Global submit error */}
             {submitError && (
               <div className="flex items-start gap-2 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium">
@@ -533,41 +517,89 @@ export default function BookingFlow() {
               </div>
             )}
 
-            {/* Payment buttons */}
+            {/* Payment options */}
             <div className="space-y-3">
-              {/* Primary: pay full total (service + booking fee) */}
-              <button
-                onClick={() => handleSubmit('full')}
-                disabled={submitting}
-                className="w-full p-5 bg-emerald-500 text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed">
-                {submitting
-                  ? <Loader2 className="w-5 h-5 animate-spin" />
-                  : <CreditCard className="w-5 h-5" />}
-                Pay {fmt(totalPrice)} Now
-                {bookingFee > 0 && (
-                  <span className="text-emerald-200 text-xs font-bold ml-1">(incl. booking fee)</span>
-                )}
-              </button>
 
-              {/* Secondary: pay booking fee only (only shown if bookingFee > 0) */}
-              {bookingFee > 0 && (
+              {/* Primary: pay full amount (service + booking fee + platform fee) */}
+              <div className="rounded-2xl border-2 border-emerald-500 overflow-hidden">
+                <div className="bg-emerald-50 px-5 pt-4 pb-3 space-y-1.5 text-sm">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700 mb-2">
+                    Pay in full today
+                  </p>
+                  <div className="flex justify-between">
+                    <span className="text-emerald-700 font-medium">
+                      {bookingFee > 0 ? 'Service + booking fee' : 'Service'}
+                    </span>
+                    <span className="font-bold text-emerald-700">{fmt(fullBase)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-emerald-600 font-medium">
+                      Platform fee
+                      <span className="ml-1 text-[10px] bg-emerald-200 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">8%</span>
+                    </span>
+                    <span className="font-bold text-emerald-600">{fmt(fullPlatformFee)}</span>
+                  </div>
+                  <div className="flex justify-between pt-1.5 border-t border-emerald-200">
+                    <span className="font-black text-emerald-900">Total charged now</span>
+                    <span className="font-black text-emerald-900 text-base">{fmt(fullTotal)}</span>
+                  </div>
+                </div>
                 <button
-                  onClick={() => handleSubmit('booking_fee')}
+                  onClick={() => handleSubmit('full')}
                   disabled={submitting}
-                  className="w-full p-5 bg-white border-2 border-gray-200 text-black rounded-2xl font-black flex items-center justify-center gap-2 hover:border-black active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                  className="w-full p-4 bg-emerald-500 text-white font-black flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                   {submitting
                     ? <Loader2 className="w-5 h-5 animate-spin" />
-                    : <Wallet className="w-5 h-5" />}
-                  Pay Booking Fee Only · {fmt(bookingFee)}
+                    : <CreditCard className="w-5 h-5" />}
+                  Pay {fmt(fullTotal)} Now
                 </button>
+              </div>
+
+              {/* Secondary: booking fee only */}
+              {bookingFee > 0 && (
+                <div className="rounded-2xl border-2 border-gray-200 overflow-hidden">
+                  <div className="bg-gray-50 px-5 pt-4 pb-3 space-y-1.5 text-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                      Reserve with booking fee only
+                    </p>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 font-medium">Booking fee</span>
+                      <span className="font-bold text-gray-700">{fmt(feeOnlyBase)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 font-medium">
+                        Platform fee
+                        <span className="ml-1 text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full font-bold">8%</span>
+                      </span>
+                      <span className="font-bold text-gray-700">{fmt(feeOnlyPlatformFee)}</span>
+                    </div>
+                    <div className="flex justify-between pt-1.5 border-t border-gray-200">
+                      <span className="font-black">Total charged now</span>
+                      <span className="font-black text-base">{fmt(feeOnlyTotal)}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 font-medium pt-1">
+                      Remaining {fmt(servicePrice)} paid directly to provider on the day.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleSubmit('booking_fee')}
+                    disabled={submitting}
+                    className="w-full p-4 bg-white text-black font-black flex items-center justify-center gap-2 border-t border-gray-200 hover:bg-gray-50 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                    {submitting
+                      ? <Loader2 className="w-5 h-5 animate-spin" />
+                      : <Wallet className="w-5 h-5" />}
+                    Reserve with {fmt(feeOnlyTotal)}
+                  </button>
+                </div>
               )}
             </div>
 
             <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-              Secure booking · No hidden charges
+              Secured by PayFast · Money held until service is confirmed
             </p>
           </div>
         );
+      }
     }
   };
 

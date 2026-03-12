@@ -57,7 +57,10 @@ export async function GET(request) {
       where: { customerId: userId, status: { in: ['PENDING', 'CONFIRMED'] }, date: { gte: new Date() } },
       orderBy: { date: 'asc' },
       select: {
-        id: true, date: true, time: true, durationMinutes: true, price: true, status: true, notes: true,
+        id: true, date: true, time: true, durationMinutes: true,
+        // FIX: select totalCharged (what customer actually paid) not price
+        totalCharged: true, price: true,
+        status: true, notes: true,
         service: { select: { name: true } },
         provider: {
           select: { id: true, location: true, averageRating: true, user: { select: { name: true, avatar: true } } },
@@ -70,7 +73,10 @@ export async function GET(request) {
       orderBy: { date: 'desc' },
       take: 20,
       select: {
-        id: true, date: true, time: true, durationMinutes: true, price: true, status: true,
+        id: true, date: true, time: true, durationMinutes: true,
+        // FIX: select totalCharged (what customer actually paid) not price
+        totalCharged: true, price: true,
+        status: true,
         service: { select: { name: true } },
         provider: {
           select: { id: true, location: true, averageRating: true, user: { select: { name: true, avatar: true } } },
@@ -92,7 +98,15 @@ export async function GET(request) {
         })
       : [];
 
-    const totalSpent = pastBookings.filter(b => b.status === 'COMPLETED').reduce((sum, b) => sum + b.price, 0);
+    // FIX: use totalCharged — fall back to price for any legacy bookings created
+    // before the financial fields migration (totalCharged will be 0 on those)
+    function resolveAmount(booking) {
+      return booking.totalCharged > 0 ? booking.totalCharged : booking.price;
+    }
+
+    const totalSpent = pastBookings
+      .filter(b => b.status === 'COMPLETED')
+      .reduce((sum, b) => sum + resolveAmount(b), 0);
 
     return NextResponse.json({
       user: {
@@ -118,17 +132,20 @@ export async function GET(request) {
         favoritesCount: favoriteProviders.length,
         totalSpent,
       },
+      // FIX: use resolveAmount for price field on both upcoming and past bookings
       upcomingBookings: upcomingBookings.map(b => ({
         id: b.id, service: b.service.name,
         date: new Date(b.date).toISOString().split('T')[0],
-        time: b.time, duration: `${b.durationMinutes} min`, price: b.price,
+        time: b.time, duration: `${b.durationMinutes} min`,
+        price: resolveAmount(b),
         status: b.status.toLowerCase(), location: b.provider.location,
         provider: { id: b.provider.id, name: b.provider.user.name, avatar: b.provider.user.avatar ?? '', rating: b.provider.averageRating ?? 0 },
       })),
       pastBookings: pastBookings.map(b => ({
         id: b.id, service: b.service.name,
         date: new Date(b.date).toISOString().split('T')[0],
-        time: b.time, duration: `${b.durationMinutes} min`, price: b.price,
+        time: b.time, duration: `${b.durationMinutes} min`,
+        price: resolveAmount(b),
         status: b.status.toLowerCase(), location: b.provider.location, reviewed: !!b.review,
         provider: { id: b.provider.id, name: b.provider.user.name, avatar: b.provider.user.avatar ?? '', rating: b.provider.averageRating ?? 0 },
       })),
@@ -180,7 +197,6 @@ export async function PATCH(request) {
           location:           location.trim(),
           address:            address?.trim() ?? '',
           preferredLanguages: preferredLanguages,
-          // Notification settings
           ...(notifications && {
             emailNotifications: notifications.emailNotifications ?? true,
             smsNotifications:   notifications.smsNotifications ?? false,
