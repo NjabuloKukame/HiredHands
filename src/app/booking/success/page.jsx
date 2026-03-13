@@ -31,14 +31,14 @@ export default function BookingSuccessPage() {
   const bookingId = searchParams.get('booking_id');
   const reference = searchParams.get('reference') || searchParams.get('trxref');
 
-  const [state,   setState]   = useState('loading');
+  const [state,   setState]   = useState(() => !bookingId ? 'error' : 'loading');
   const [booking, setBooking] = useState(null);
   const pollCount             = useRef(0);
   const MAX_POLLS             = 18;
   const POLL_INTERVAL         = 2000;
 
   useEffect(() => {
-    if (!bookingId) { setState('error'); return; }
+    if (!bookingId) return;
 
     let isMounted = true;
 
@@ -114,7 +114,7 @@ export default function BookingSuccessPage() {
         <div>
           <h2 className="text-xl font-black mb-2">Payment Cancelled</h2>
           <p className="text-gray-400 font-medium text-sm">
-            No payment was taken. You can try again whenever you're ready.
+            No payment was taken. You can try again whenever you&apos;re ready.
           </p>
         </div>
         <button onClick={() => router.back()}
@@ -158,7 +158,7 @@ export default function BookingSuccessPage() {
           <h2 className="text-xl font-black mb-2">Payment Processing</h2>
           <p className="text-gray-400 font-medium text-sm leading-relaxed">
             Your payment is being processed. Your booking will be confirmed within a few minutes
-            and you'll receive a confirmation email shortly.
+            and you&apos;ll receive a confirmation email shortly.
           </p>
         </div>
         <button onClick={() => router.push('/customer-dashboard')}
@@ -252,7 +252,7 @@ export default function BookingSuccessPage() {
           </div>
           <p className="text-xs text-blue-700 font-medium leading-relaxed">
             Your payment is held securely until the day of your appointment.
-            When the provider arrives, they'll show you a verification PIN — enter it in your app
+            When the provider arrives, they&apos;ll show you a verification PIN — enter it in your app
             to confirm the service is underway. Payment is only released to the provider at that point.
           </p>
         </div>
