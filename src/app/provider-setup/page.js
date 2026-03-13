@@ -478,7 +478,7 @@ export default function ProviderSetup() {
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-xl font-bold text-slate-900">Working Hours</h2>
-                    <p className="text-sm text-slate-400 mt-1 font-medium">Set the days and hours you're available for bookings.</p>
+                    <p className="text-sm text-slate-400 mt-1 font-medium">Set the days and hours you&apos;re available for bookings.</p>
                   </div>
                   <button onClick={addAvailabilitySlot} className="text-black text-xs font-bold border border-gray-100 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
                     + Add Slot
