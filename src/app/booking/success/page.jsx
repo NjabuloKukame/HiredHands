@@ -12,7 +12,7 @@
 // using the reference from the URL as a fallback.
 // ============================================================
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter }  from 'next/navigation';
 import {
   Check, Loader2, AlertCircle,
@@ -24,7 +24,7 @@ function fmtExact(amount) {
   return `R${Number(amount).toFixed(2)}`;
 }
 
-export default function BookingSuccessPage() {
+function BookingSuccessContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
@@ -270,5 +270,20 @@ export default function BookingSuccessPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function BookingSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4 text-gray-400">
+          <Loader2 className="w-8 h-8 animate-spin" />
+          <p className="text-sm font-bold">Loading...</p>
+        </div>
+      </div>
+    }>
+      <BookingSuccessContent />
+    </Suspense>
   );
 }
