@@ -341,7 +341,7 @@ export default function ProviderDashboard() {
                 <div className="space-y-6">
                   <div className="bg-black rounded-2xl p-6 text-white shadow-lg">
                     <h3 className="font-bold text-lg mb-2">Grow your revenue</h3>
-                    <p className="text-gray-300 text-sm leading-relaxed mb-6">Providers using our "Last Minute" promotion see a 24% increase in bookings.</p>
+                    <p className="text-gray-300 text-sm leading-relaxed mb-6">Providers using our &quot;Last Minute&quot; promotion see a 24% increase in bookings.</p>
                     <button className="w-full py-2 bg-white text-black font-bold rounded-lg text-sm hover:bg-gray-50 transition-colors">Create Promotion</button>
                   </div>
                   {data.reviews.length > 0 && (
