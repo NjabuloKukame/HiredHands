@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import NextImage from 'next/image';
 import {
   Briefcase, MapPin, Phone, Clock, Globe, Plus, Trash2,
   Check, ArrowLeft, ArrowRight, DollarSign, Tag, Camera,
@@ -331,9 +332,9 @@ export default function ProviderSetup() {
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                 <div className="flex flex-col items-center">
                   <div className="relative">
-                    <div className="w-28 h-28 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
+                    <div className="w-28 h-28 rounded-4xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
                       {profileImage
-                        ? <img src={profileImage} className="w-full h-full object-cover" alt="Business" />
+                        ? <NextImage src={profileImage} width={112} height={112} className="w-full h-full object-cover" alt="Business" />
                         : <Briefcase className="w-8 h-8 text-slate-300" />}
                     </div>
                     <button onClick={() => fileInputRef.current?.click()} className="absolute -bottom-2 -right-2 p-3 bg-black text-white rounded-2xl shadow-lg hover:scale-110 transition-all">
@@ -435,7 +436,7 @@ export default function ProviderSetup() {
 
                 <div className="space-y-4">
                   {services.map(service => (
-                    <div key={service.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-200 relative">
+                    <div key={service.id} className="p-6 bg-slate-50 rounded-4xl border border-slate-200 relative">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormInput label="Service Name" icon={Tag} value={service.name}
                           onChange={v => updateService(service.id, 'name', v)} placeholder="Full House Cleaning" />
@@ -456,7 +457,7 @@ export default function ProviderSetup() {
                           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Description (optional)</label>
                           <textarea value={service.description} onChange={e => updateService(service.id, 'description', e.target.value)}
                             rows={2} className="w-full bg-white border border-slate-200 rounded-2xl p-4 focus:border-black outline-none transition-all text-sm"
-                            placeholder="What's included in this service?" />
+                            placeholder="What&apos;s included in this service?" />
                         </div>
                       </div>
                       {services.length > 1 && (
@@ -489,7 +490,7 @@ export default function ProviderSetup() {
                 <div className="space-y-3">
                   {availability.map((slot, index) => (
                     <div key={index} className="flex flex-wrap items-end gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                      <div className="flex-1 min-w-[140px]">
+                      <div className="flex-1 min-w-35">
                         <label className="text-[10px] font-bold text-slate-400 uppercase">Day</label>
                         <select value={slot.dayOfWeek} onChange={e => updateAvailability(index, 'dayOfWeek', e.target.value)}
                           className="w-full mt-1 bg-white border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:border-black appearance-none">
@@ -530,12 +531,12 @@ export default function ProviderSetup() {
                 <div className="grid grid-cols-2 gap-4">
                   {portfolioImages.map((img, index) => (
                     <div key={index} className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-50">
-                      <img src={img.preview} alt={`Portfolio ${index + 1}`} className="w-full aspect-square object-cover" />
+                      <NextImage src={img.preview} alt={`Portfolio ${index + 1}`} width={300} height={300} className="w-full aspect-square object-cover" />
                       <button onClick={() => removePortfolioImage(index)}
                         className="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm text-slate-600 hover:text-red-500 rounded-lg shadow-sm transition-colors">
                         <X className="w-4 h-4" />
                       </button>
-                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-linear-to-t from-black/60 to-transparent">
                         <input type="text" value={img.title} onChange={e => updatePortfolioTitle(index, e.target.value)}
                           placeholder="Add a caption..."
                           className="w-full bg-transparent text-white text-xs font-medium placeholder:text-white/60 outline-none border-b border-white/30 focus:border-white pb-0.5" />

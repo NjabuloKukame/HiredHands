@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   User, MapPin, Phone, Mail, Heart, Bell, Plus, Trash2,
   Check, ArrowLeft, ArrowRight, Globe, Camera, Sparkles, Loader2, AlertCircle
@@ -177,7 +178,7 @@ export default function CustomerSetup() {
             <Sparkles className="w-3 h-3" /> Get Started
           </div>
           <h1 className="text-3xl font-black tracking-tight text-slate-900">Complete your profile</h1>
-          <p className="mt-2 text-slate-500 font-medium">Let's get your account ready for your first booking.</p>
+          <p className="mt-2 text-slate-500 font-medium">Let&apos;s get your account ready for your first booking.</p>
         </header>
 
         {/* Stepper */}
@@ -215,7 +216,7 @@ export default function CustomerSetup() {
                   <div className="relative">
                     <div className="w-32 h-32 rounded-4xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
                       {profileImage
-                        ? <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                        ? <Image src={profileImage} alt="Profile" width={128} height={128} className="w-full h-full object-cover" />
                         : <User className="h-10 w-10 text-slate-200" />}
                     </div>
                     <button
@@ -317,7 +318,7 @@ export default function CustomerSetup() {
                     <h2 className="text-xl font-bold text-slate-900">Preferred Languages</h2>
                   </div>
                   <p className="text-sm text-slate-400 mb-4 font-medium">
-                    We'll prioritize providers who speak your language.
+                    We&apos;ll prioritize providers who speak your language.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {availableLanguages.map(lang => {
@@ -348,7 +349,7 @@ export default function CustomerSetup() {
               <div className="space-y-6 animate-in fade-in zoom-in-95">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Notification Settings</h2>
-                  <p className="text-sm text-slate-400 mt-1 font-medium">Choose how you'd like to hear from us.</p>
+                  <p className="text-sm text-slate-400 mt-1 font-medium">Choose how you&apos;d like to hear from us.</p>
                 </div>
                 <div className="space-y-3">
                   {Object.entries(notifications).map(([key, val]) => (

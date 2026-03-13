@@ -40,47 +40,58 @@ export default function BookingSuccessPage() {
   useEffect(() => {
     if (!bookingId) { setState('error'); return; }
 
+    let isMounted = true;
+
     async function checkBooking() {
       try {
-        // Pass reference so the status route can do a direct Paystack verify fallback
         const url = `/api/checkout/status?booking_id=${bookingId}${reference ? `&reference=${reference}` : ''}`;
         const res  = await fetch(url);
         const data = await res.json();
 
-        if (!res.ok) { setState('error'); return; }
+        if (!isMounted) return { done: true };
+        if (!res.ok) return { done: true, state: 'error' };
 
         if (data.booking.paymentStatus === 'PAID') {
-          setBooking(data.booking);
-          setState('success');
-          return true; // stop polling
+          return { done: true, state: 'success', booking: data.booking };
         }
 
         if (data.booking.status === 'CANCELLED') {
-          setState('cancelled');
-          return true;
+          return { done: true, state: 'cancelled' };
         }
 
         pollCount.current += 1;
         if (pollCount.current >= MAX_POLLS) {
-          setBooking(data.booking);
-          setState('pending');
-          return true;
+          return { done: true, state: 'pending', booking: data.booking };
         }
       } catch {
-        setState('error');
-        return true;
+        return { done: true, state: 'error' };
       }
-      return false;
+      return { done: false };
     }
 
-    checkBooking().then(done => {
-      if (done) return;
-      const interval = setInterval(async () => {
-        const done = await checkBooking();
-        if (done) clearInterval(interval);
+    let interval;
+    checkBooking().then(result => {
+      if (!isMounted) return;
+      if (result.done) {
+        if (result.booking) setBooking(result.booking);
+        if (result.state) setState(result.state);
+        return;
+      }
+      interval = setInterval(async () => {
+        const result = await checkBooking();
+        if (!isMounted) return;
+        if (result.done) {
+          clearInterval(interval);
+          if (result.booking) setBooking(result.booking);
+          if (result.state) setState(result.state);
+        }
       }, POLL_INTERVAL);
-      return () => clearInterval(interval);
     });
+
+    return () => {
+      isMounted = false;
+      if (interval) clearInterval(interval);
+    };
   }, [bookingId, reference]);
 
   // ── Loading ───────────────────────────────────────────────────────────────

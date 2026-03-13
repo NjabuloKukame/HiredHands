@@ -34,7 +34,7 @@ export default function LandingPage() {
       <section className="pt-28 md:pt-40 pb-16 px-5 md:px-10">
         <div className="max-w-6xl mx-auto">
           <div className="text-left md:text-center mb-12">
-            <h1 className="text-[2.5rem] md:text-8xl font-black tracking-tighter leading-[1] mb-6">
+            <h1 className="text-[2.5rem] md:text-8xl font-black tracking-tighter leading-none mb-6">
               Connect Every <br />
               <span className="text-gray-300">Service</span> Easily
             </h1>
@@ -66,7 +66,7 @@ export default function LandingPage() {
                   onChange={(e) => setLocation(e.target.value)}
                 />
               </div>
-              <button type="submit" className="bg-[#1a1a1a] text-white p-4 md:px-10 rounded-[2rem] font-black hover:bg-black transition-all flex items-center justify-center gap-2">
+              <button type="submit" className="bg-[#1a1a1a] text-white p-4 md:px-10 rounded-4xl font-black hover:bg-black transition-all flex items-center justify-center gap-2">
                 Search <ArrowRight className="w-5 h-5" />
               </button>
             </div>
@@ -75,9 +75,9 @@ export default function LandingPage() {
           {/* Bento Grid - Stacks on mobile */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {categories.map((cat, i) => (
-              <div key={i} className={`relative overflow-hidden rounded-[2.5rem] h-[300px] md:h-[400px] group cursor-pointer ${cat.span}`}>
+              <div key={i} className={`relative overflow-hidden rounded-[2.5rem] h-75 md:h-100 group cursor-pointer ${cat.span}`}>
                 <Image src={cat.image} alt={cat.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-8 left-8">
                   <span className="text-[10px] uppercase font-black tracking-[0.2em] text-white/60 mb-1 block">{cat.count}</span>
                   <h3 className="text-2xl font-black text-white">{cat.name}</h3>
@@ -105,7 +105,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featuredProviders.map((p) => (
               <div key={p.id} className="bg-white rounded-[2.5rem] p-4 border border-gray-100 group">
-                <div className="relative h-64 md:h-72 rounded-[2rem] overflow-hidden mb-6">
+                <div className="relative h-64 md:h-72 rounded-4xl overflow-hidden mb-6">
                   <Image src={p.image} alt="" fill className="object-cover" />
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1">
                     <Star className="w-3 h-3 fill-black" />

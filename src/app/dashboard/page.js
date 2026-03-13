@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Calendar, DollarSign, Users, Star, Plus, Trash2,
   TrendingUp, X, ChevronRight, Loader2, AlertCircle,
-  Clock, Tag, User, Image, Briefcase, MapPin, Phone,
+  Clock, Tag, User, Image as ImageIcon, Briefcase, MapPin, Phone,
   Globe, Edit2, Check, Save, ImagePlus
 } from 'lucide-react';
 
@@ -109,7 +110,7 @@ export default function ProviderDashboard() {
   useEffect(() => {
     if (!isModalOpen || categories.length > 0) return;
     fetch('/api/categories').then(r => r.json()).then(setCategories).catch(() => {});
-  }, [isModalOpen]);
+  }, [isModalOpen, categories.length]);
 
   // ── Add service ────────────────────────────────────────────────────────────
   const handleAddService = async (e) => {
@@ -318,7 +319,7 @@ export default function ProviderDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           {booking.customerAvatar
-                            ? <img src={booking.customerAvatar} className="w-10 h-10 rounded-full object-cover" alt="" />
+                            ? <Image src={booking.customerAvatar} width={40} height={40} className="w-10 h-10 rounded-full object-cover" alt="" />
                             : <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center"><User className="h-5 w-5 text-gray-300" /></div>}
                           <div>
                             <h4 className="text-slate-900 font-bold text-sm">{booking.customerName}</h4>
@@ -351,7 +352,7 @@ export default function ProviderDashboard() {
                           <div key={review.id} className="border-b border-slate-50 pb-4 last:border-0 last:pb-0">
                             <div className="flex items-center gap-2 mb-1">
                               {review.customerAvatar
-                                ? <img src={review.customerAvatar} className="w-7 h-7 rounded-full object-cover" alt="" />
+                                ? <Image src={review.customerAvatar} width={28} height={28} className="w-7 h-7 rounded-full object-cover" alt="" />
                                 : <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center"><User className="h-3 w-3 text-slate-400" /></div>}
                               <span className="text-xs font-bold text-slate-700">{review.customerName}</span>
                               <div className="flex ml-auto">
@@ -383,7 +384,7 @@ export default function ProviderDashboard() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
                         {booking.customerAvatar
-                          ? <img src={booking.customerAvatar} className="w-12 h-12 rounded-full object-cover ring-4 ring-slate-50" alt="" />
+                          ? <Image src={booking.customerAvatar} width={48} height={48} className="w-12 h-12 rounded-full object-cover ring-4 ring-slate-50" alt="" />
                           : <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center ring-4 ring-slate-50"><User className="h-6 w-6 text-gray-300" /></div>}
                         <div>
                           <h4 className="font-bold text-slate-900">{booking.customerName}</h4>
@@ -463,7 +464,7 @@ export default function ProviderDashboard() {
 
                 {data.portfolio.length === 0 ? (
                   <div className="text-center py-20 bg-white border-2 border-dashed border-slate-200 rounded-2xl text-slate-400">
-                    <Image className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                    <ImageIcon className="h-12 w-12 mx-auto mb-3 opacity-20" />
                     <p className="font-semibold text-slate-500">No portfolio photos yet</p>
                     <p className="text-sm mt-1 mb-6">Show customers your best work by uploading up to 4 photos.</p>
                     <button onClick={() => portfolioInputRef.current?.click()}
@@ -475,7 +476,7 @@ export default function ProviderDashboard() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {data.portfolio.map(item => (
                       <div key={item.id} className="relative group rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 aspect-square">
-                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                        <Image src={item.imageUrl} alt={item.title} width={300} height={300} className="w-full h-full object-cover" />
                         {/* Overlay on hover */}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
                           <button onClick={() => handlePortfolioDelete(item.id)}
@@ -485,7 +486,7 @@ export default function ProviderDashboard() {
                         </div>
                         {/* Caption */}
                         {item.title && item.title !== 'Portfolio Image' && (
-                          <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                          <div className="absolute bottom-0 left-0 right-0 p-2 bg-linear-to-t from-black/60 to-transparent">
                             <p className="text-white text-xs font-medium truncate">{item.title}</p>
                           </div>
                         )}
@@ -546,7 +547,7 @@ export default function ProviderDashboard() {
                   <div className="space-y-4">
                     <div className="bg-white border border-slate-200 rounded-xl p-6 text-center shadow-sm">
                       {data.provider.avatar
-                        ? <img src={data.provider.avatar} className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-slate-50" alt="" />
+                        ? <Image src={data.provider.avatar} width={96} height={96} className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-slate-50" alt="" />
                         : <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center mx-auto border-4 border-slate-50"><User className="h-10 w-10 text-slate-300" /></div>}
                       <h2 className="text-xl font-bold text-slate-900 mt-4">{data.provider.businessName}</h2>
                       <p className="text-sm text-slate-500 font-medium">{data.provider.location}</p>
@@ -774,7 +775,7 @@ export default function ProviderDashboard() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description (optional)</label>
-                <textarea rows={2} placeholder="What's included?"
+                <textarea rows={2} placeholder="What&apos;s included?"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black transition-all"
                   value={newService.description} onChange={e => setNewService({ ...newService, description: e.target.value })} />
               </div>
