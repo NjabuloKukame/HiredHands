@@ -10,6 +10,7 @@
 import { NextResponse }  from 'next/server';
 import jwt               from 'jsonwebtoken';
 import { PrismaClient }  from '@/generated/prisma';
+import { sendBookingConfirmation, sendProviderBookingAlert } from '@/app/lib/email';
 
 const prisma = new PrismaClient();
 
@@ -52,13 +53,19 @@ export async function GET(request) {
         totalCharged:  true,
         price:         true,
         paymentType:   true,
+        notes:         true,
         pfPaymentToken: true,
         customerName:  true,
         customerEmail: true,
         customerPhone: true,
         providerId:    true,
         service:       { select: { name: true } },
-        provider:      { select: { businessName: true } },
+        provider: {
+          select: {
+            businessName: true,
+            user:         { select: { email: true } },
+          },
+        },
       },
     });
 
@@ -125,6 +132,44 @@ export async function GET(request) {
             // Update local booking object to reflect new state
             booking.status        = 'CONFIRMED';
             booking.paymentStatus = 'PAID';
+
+            // Fire emails non-blocking
+            const formattedDate = new Date(booking.date).toLocaleDateString('en-ZA', {
+              weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+            });
+            const tc  = resolveAmount(booking);
+            const sub = booking.subtotal    > 0 ? booking.subtotal    : booking.price;
+            const pf  = booking.platformFee > 0 ? booking.platformFee : 0;
+
+            Promise.all([
+              sendBookingConfirmation({
+                bookingId:     booking.id,
+                customerName:  booking.customerName,
+                customerEmail: booking.customerEmail,
+                serviceName:   booking.service.name,
+                providerName:  booking.provider.businessName,
+                date:          formattedDate,
+                time:          booking.time,
+                subtotal:      sub,
+                platformFee:   pf,
+                totalCharged:  tc,
+                paymentType:   booking.paymentType ?? 'booking_fee',
+              }),
+              sendProviderBookingAlert({
+                bookingId:     booking.id,
+                providerEmail: booking.provider.user.email,
+                providerName:  booking.provider.businessName,
+                customerName:  booking.customerName,
+                customerEmail: booking.customerEmail,
+                customerPhone: booking.customerPhone,
+                serviceName:   booking.service.name,
+                date:          formattedDate,
+                time:          booking.time,
+                subtotal:      sub,
+                paymentType:   booking.paymentType ?? 'booking_fee',
+                notes:         booking.notes ?? null,
+              }),
+            ]).catch(err => console.error('[status] Email send error:', err));
           }
         }
       } catch (verifyError) {

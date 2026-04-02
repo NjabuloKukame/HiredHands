@@ -1,99 +1,69 @@
 // ============================================================
 // FILE: app/api/checkout/webhook/route.js
-//
-// Receives Paystack webhook events.
-//
-// RENAME: your current file is api/checkout/notify/route.js
-// Delete that folder and create api/checkout/webhook/route.js
-//
-// PAYSTACK WEBHOOK SECURITY MODEL:
-//   1. Paystack sends header: x-paystack-signature
-//   2. Value is HMAC-SHA512 of raw request body using your secret key
-//   3. We recompute and compare — if mismatch, ignore silently
-//   4. On charge.success: cross-check amount against DB (max 1 kobo tolerance)
-//   5. Idempotency: only process if paymentStatus is still PENDING
-//
-// ALWAYS return 200 — Paystack retries on any non-200 response.
-// Log errors internally, never expose them in the response body.
-//
-// EVENT WE CARE ABOUT: charge.success
-// Others (charge.failed etc.) are ignored — the booking stays
-// PENDING and will be cleaned up by the cron job.
 // ============================================================
 
 import { NextResponse }  from 'next/server';
 import crypto            from 'crypto';
 import { PrismaClient }  from '@/generated/prisma';
+import { sendBookingConfirmation, sendProviderBookingAlert } from '@/app/lib/email';
 
 const prisma = new PrismaClient();
 
-// ── POST /api/checkout/webhook ────────────────────────────────────────────────
+const SUCCESS_CODES = new Set(['000.000.000', '000.100.110']);
+const PENDING_CODES = /^(000\.200\.|000\.400\.)/;
+
+function verifySignature(rawBody, signature, secret) {
+  const expected = crypto
+    .createHmac('sha512', secret)
+    .update(rawBody)
+    .digest('hex');
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expected, 'hex'),
+      Buffer.from(signature, 'hex')
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request) {
   try {
-    // ── Read raw body — must be raw string for signature verification ─────────
-    const rawBody  = await request.text();
+    const rawBody   = await request.text();
     const signature = request.headers.get('x-paystack-signature');
 
-    // ── SECURITY CHECK: Verify HMAC-SHA512 signature ──────────────────────────
     if (!signature || !process.env.PAYSTACK_SECRET_KEY) {
       console.error('[webhook] Missing signature or secret key');
       return new Response('OK', { status: 200 });
     }
 
-    const expectedSig = crypto
-      .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
-      .update(rawBody)
-      .digest('hex');
-
-    // Constant-time comparison to prevent timing attacks
-    const sigValid = (() => {
-      try {
-        return crypto.timingSafeEqual(
-          Buffer.from(expectedSig, 'hex'),
-          Buffer.from(signature,   'hex')
-        );
-      } catch {
-        return false;
-      }
-    })();
-
-    if (!sigValid) {
+    if (!verifySignature(rawBody, signature, process.env.PAYSTACK_SECRET_KEY)) {
       console.error('[webhook] Signature mismatch — ignoring');
       return new Response('OK', { status: 200 });
     }
 
-    // ── Parse event ───────────────────────────────────────────────────────────
     let event;
-    try {
-      event = JSON.parse(rawBody);
-    } catch {
-      console.error('[webhook] Failed to parse JSON body');
-      return new Response('OK', { status: 200 });
-    }
+    try { event = JSON.parse(rawBody); }
+    catch { return new Response('OK', { status: 200 }); }
 
     const eventType = event.event;
     const data      = event.data;
 
     console.log('[webhook] Paystack event:', eventType, data?.reference);
 
-    // ── Only handle charge.success ─────────────────────────────────────────
-    // All other events (charge.failed, transfer.success etc.) are ignored here.
-    // Transfer events for provider payouts are handled in the PIN verify route.
     if (eventType !== 'charge.success') {
       return new Response('OK', { status: 200 });
     }
 
-    // ── Extract our reference (= pfPaymentToken = idempotency token) ──────────
-    const reference = data?.reference;
+    const reference     = data?.reference;
+    const metaBookingId = data?.metadata?.bookingId;
+
     if (!reference) {
       console.error('[webhook] No reference in event data');
       return new Response('OK', { status: 200 });
     }
 
-    // ── Also try to get bookingId from metadata ───────────────────────────────
-    const metaBookingId = data?.metadata?.bookingId;
-
-    // ── Find the booking ──────────────────────────────────────────────────────
+    // Fetch booking with all data needed for emails
     const booking = await prisma.booking.findFirst({
       where: metaBookingId
         ? { id: metaBookingId }
@@ -103,8 +73,24 @@ export async function POST(request) {
         status:        true,
         paymentStatus: true,
         totalCharged:  true,
+        subtotal:      true,
+        platformFee:   true,
         price:         true,
+        paymentType:   true,
+        notes:         true,
+        date:          true,
+        time:          true,
         providerId:    true,
+        customerName:  true,
+        customerEmail: true,
+        customerPhone: true,
+        service:       { select: { name: true } },
+        provider: {
+          select: {
+            businessName: true,
+            user:         { select: { email: true } },
+          },
+        },
       },
     });
 
@@ -113,28 +99,24 @@ export async function POST(request) {
       return new Response('OK', { status: 200 });
     }
 
-    // ── SECURITY CHECK: Amount cross-check ────────────────────────────────────
-    // Paystack sends amount in kobo — convert back to rands for comparison
-    const expectedRands  = booking.totalCharged > 0 ? booking.totalCharged : booking.price;
-    const receivedRands  = (data?.amount ?? 0) / 100;
+    // Amount cross-check
+    const expectedRands = booking.totalCharged > 0 ? booking.totalCharged : booking.price;
+    const receivedRands = (data?.amount ?? 0) / 100;
 
     if (Math.abs(receivedRands - expectedRands) > 0.01) {
-      console.error(
-        `[webhook] Amount mismatch on booking ${booking.id}:`,
-        `expected R${expectedRands}, got R${receivedRands}`
-      );
+      console.error(`[webhook] Amount mismatch on booking ${booking.id}: expected R${expectedRands}, got R${receivedRands}`);
       return new Response('OK', { status: 200 });
     }
 
-    // ── Idempotency guard — only confirm once ─────────────────────────────────
+    // Idempotency — only process once
     if (booking.paymentStatus === 'PAID') {
       console.log(`[webhook] Booking ${booking.id} already PAID — skipping`);
       return new Response('OK', { status: 200 });
     }
 
-    // ── Confirm the booking ───────────────────────────────────────────────────
     const paystackTxId = String(data?.id ?? reference);
 
+    // Confirm booking in DB
     await prisma.$transaction([
       prisma.booking.update({
         where: { id: booking.id },
@@ -146,14 +128,14 @@ export async function POST(request) {
       }),
       prisma.payment.create({
         data: {
-          bookingId:      booking.id,
-          amount:         receivedRands,
-          currency:       'ZAR',
-          paymentMethod:  data?.channel ?? 'card',  // "card" | "bank" | "ussd" etc.
-          transactionId:  paystackTxId,
+          bookingId:       booking.id,
+          amount:          receivedRands,
+          currency:        'ZAR',
+          paymentMethod:   data?.channel ?? 'card',
+          transactionId:   paystackTxId,
           paymentIntentId: reference,
-          status:         'PAID',
-          paidAt:         new Date(),
+          status:          'PAID',
+          paidAt:          new Date(),
         },
       }),
       prisma.providerProfile.update({
@@ -163,11 +145,52 @@ export async function POST(request) {
     ]);
 
     console.log(`[webhook] ✓ Booking ${booking.id} confirmed — R${receivedRands}`);
+
+    // ── Send emails — after DB commit, non-blocking ───────────────────────────
+    // Format date for emails
+    const formattedDate = new Date(booking.date).toLocaleDateString('en-ZA', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    });
+
+    const totalCharged = booking.totalCharged > 0 ? booking.totalCharged : booking.price;
+    const subtotal     = booking.subtotal     > 0 ? booking.subtotal     : booking.price;
+    const platformFee  = booking.platformFee  > 0 ? booking.platformFee  : 0;
+
+    // Fire both emails in parallel — don't await, don't block the webhook response
+    Promise.all([
+      sendBookingConfirmation({
+        bookingId:     booking.id,
+        customerName:  booking.customerName,
+        customerEmail: booking.customerEmail,
+        serviceName:   booking.service.name,
+        providerName:  booking.provider.businessName,
+        date:          formattedDate,
+        time:          booking.time,
+        subtotal,
+        platformFee,
+        totalCharged,
+        paymentType:   booking.paymentType ?? 'booking_fee',
+      }),
+      sendProviderBookingAlert({
+        bookingId:     booking.id,
+        providerEmail: booking.provider.user.email,
+        providerName:  booking.provider.businessName,
+        customerName:  booking.customerName,
+        customerEmail: booking.customerEmail,
+        customerPhone: booking.customerPhone,
+        serviceName:   booking.service.name,
+        date:          formattedDate,
+        time:          booking.time,
+        subtotal,
+        paymentType:   booking.paymentType ?? 'booking_fee',
+        notes:         booking.notes ?? null,
+      }),
+    ]).catch(err => console.error('[webhook] Email send error:', err));
+
     return new Response('OK', { status: 200 });
 
   } catch (error) {
     console.error('[webhook] Handler error:', error);
-    // Always 200 — Paystack will retry on non-200
     return new Response('OK', { status: 200 });
   } finally {
     await prisma.$disconnect();
